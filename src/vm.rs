@@ -82,16 +82,41 @@ impl Vm{
                 self.next_8_bits();
             },
             Opcode::NEQ => {
+                let val1 = self.registers[self.next_8_bits() as usize];
+                let val2 = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = !val1.eq(&val2);
+                self.next_8_bits();
             },
             Opcode::GT => {
+                let val1 = self.registers[self.next_8_bits() as usize];
+                let val2 = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = val1 > val2;
+                self.next_8_bits();
+ 
             },
             Opcode::LT =>{
+                let val1 = self.registers[self.next_8_bits() as usize];
+                let val2 = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = val1 < val2;
+                self.next_8_bits();
             },
             Opcode::GTQ => {
+                let val1 = self.registers[self.next_8_bits() as usize];
+                let val2 = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = val1 >= val2;
+                self.next_8_bits();
+
             },
             Opcode::LTQ =>{
+                let val1 = self.registers[self.next_8_bits() as usize];
+                let val2 = self.registers[self.next_8_bits() as usize];
+                self.equal_flag = val1 <= val2;
+                self.next_8_bits();
             },
             Opcode::JEQ => {
+                if self.equal_flag{
+                    self.pc = self.registers[self.next_8_bits() as usize] as usize;
+                }
             },
             _ => {
                 println!("This is not an opcode");
@@ -198,7 +223,20 @@ mod tests{
         vm.registers[1] =1;
         vm.program= vec![9,0,1,2];
         vm.run();
-        assert(vm.equal_flag);
+        assert!(vm.equal_flag);
+        vm.registers[0] = 32;
+        vm.pc = 0;
+        vm.run();
+        assert!(!vm.equal_flag);
+    }
+    #[test]
+    fn test_jeq_opcode() {
+        let mut vm = Vm::new();
+        vm.registers[0] = 7;
+        vm.equal_flag = true;
+        vm.program = vec![15, 0, 0, 0, 17, 0, 0, 0,];
+        vm.run_once();
+        assert_eq!(vm.pc, 7);
     }
 
 }
