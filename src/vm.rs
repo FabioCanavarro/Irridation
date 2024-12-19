@@ -118,6 +118,12 @@ impl Vm{
                     self.pc = self.registers[self.next_8_bits() as usize] as usize;
                 }
             },
+            Opcode::JNEQ => {
+                if !self.equal_flag{
+                    self.pc = self.registers[self.next_8_bits() as usize] as usize;
+                }
+            },
+            
             _ => {
                 println!("This is not an opcode");
             }       
@@ -230,13 +236,19 @@ mod tests{
         assert!(!vm.equal_flag);
     }
     #[test]
-    fn test_jeq_opcode() {
+    fn test_jeq_and_jneq_opcode() {
         let mut vm = Vm::new();
         vm.registers[0] = 7;
+        vm.registers[1] = 1;
         vm.equal_flag = true;
-        vm.program = vec![15, 0, 0, 0, 17, 0, 0, 0,];
+        vm.program = vec![15, 0, 0, 0, 16, 1, 0, 0,];
         vm.run_once();
         assert_eq!(vm.pc, 7);
+        vm.pc = 0;
+        vm.equal_flag = false;
+        vm.run_once();
+        assert_eq!(vm.pc,1);
+        
     }
 
 }
