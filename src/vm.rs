@@ -1,13 +1,10 @@
-use std::usize;
-
 use crate::instruction::Opcode;
-
 // Emulate cpu
 #[derive(Debug,PartialEq)]
 pub struct Vm {
-    registers: [i32; 32],
+    pub registers: [i32; 32],
     pc: usize,
-    program: Vec<u8>,
+    pub program: Vec<u8>,
     remainder: u32,
     equal_flag: bool
 }
@@ -36,9 +33,6 @@ impl Vm{
 
     fn match_opcode(&mut self,opcode: Opcode){
         match opcode{
-            Opcode::HLT => {
-                println!("Opcode HLT");
-            },
             Opcode::LOAD =>{
                 let register: usize = self.next_8_bits() as usize;
                 let number: u16 = self.next_16_bits();
@@ -163,6 +157,15 @@ impl Vm{
         self.pc +=2;
         result
     }
+    pub fn add_byte(&mut self,v: u8){
+        self.program.push(v)
+    }
+
+
+
+    pub fn add_bytes(&mut self, mut v: Vec<u8>){
+        self.program.append(&mut v)
+    }
 
 
 }
@@ -183,7 +186,7 @@ mod tests{
         vm.program = vec![0,0,0,0];
         vm.run();
         println!("{}",vm.pc);
-        assert_eq!(vm.pc,1);
+        assert_eq!(vm.pc,4);
     }
     
     #[test]
@@ -198,7 +201,7 @@ mod tests{
     #[test]
     fn test_load_opcode(){
         let mut vm = Vm::new();
-        vm.program = vec![1,0,1,244];
+        vm.program = vec![0,0,1,244];
         vm.run();
         assert_eq!(vm.registers[0],500);
     }
@@ -207,27 +210,34 @@ mod tests{
     fn test_jmp_opcode(){
         let mut vm = Vm::new();
         vm.registers[0] = 1;
-        vm.program = vec![6,0,0,0];
+        vm.program = vec![5,0,0,0];
         vm.run_once();
         assert_eq!(vm.pc,1);
     }
     #[test]
-    fn test_jmpfb_opcode(){
+    fn test_jmpb_opcode(){
         let mut vm = Vm::new();
         vm.registers[0] = 1;
-        vm.program = vec![8,0,0,0];
-        vm.run();
-        assert_eq!(vm.pc,1);
         vm.program = vec![7,0,0,0];
-        vm.run();
-        assert_eq!(vm.pc,2);
+        vm.execute_once();
+        assert_eq!(vm.pc,1);
     }
+
+    #[test]
+    fn test_jmpf_opcode() {
+        let mut vm = Vm::new();
+        vm.registers[0] = 1;
+        vm.program = vec![6,0,0,0];
+        vm.run();
+        assert_eq!(vm.pc,3);
+    }
+    
     #[test]
     fn test_eq(){
         let mut vm = Vm::new();
         vm.registers[0] =1;
         vm.registers[1] =1;
-        vm.program= vec![9,0,1,2];
+        vm.program= vec![8,0,1,2];
         vm.run();
         assert!(vm.equal_flag);
         vm.registers[0] = 32;
@@ -241,7 +251,7 @@ mod tests{
         vm.registers[0] = 7;
         vm.registers[1] = 1;
         vm.equal_flag = true;
-        vm.program = vec![15, 0, 0, 0, 16, 1, 0, 0,];
+        vm.program = vec![14, 0, 0, 0, 15, 1, 0, 0,];
         vm.run_once();
         assert_eq!(vm.pc, 7);
         vm.pc = 0;
