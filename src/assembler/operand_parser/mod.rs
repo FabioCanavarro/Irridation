@@ -4,7 +4,7 @@ use nom::digit;
 
 
 named!(
-    interger_operand<CompleteStr,Token>,
+    pub interger_operand<CompleteStr,Token>,
     ws!(
         do_parse!(
             tag!("#") >> val: digit >>

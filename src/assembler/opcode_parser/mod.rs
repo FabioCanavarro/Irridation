@@ -1,8 +1,9 @@
 use crate::instruction::Opcode;
 use nom::types::CompleteStr;
 use crate::assembler::Token;
+
 named!(
-    opcode_load<CompleteStr,Token>,
+    pub opcode_load<CompleteStr,Token>,
     do_parse!(
         tag!("load") >> (Token::Op{code: Opcode::LOAD})
         // looks for load, and if founded returns the enum

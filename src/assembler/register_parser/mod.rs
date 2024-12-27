@@ -3,7 +3,7 @@ use crate::assembler::Token;
 use nom::digit;
 
 named!(
-    register <CompleteStr,Token>,
+    pub register <CompleteStr,Token>,
     ws!(
         do_parse!(
             tag!("$") >>
@@ -19,6 +19,7 @@ named!(
 
 mod tests{
     use super::*;
+
     #[test]
     fn test_parse_registers() {
         let result = register(CompleteStr("$0"));
