@@ -117,6 +117,11 @@ impl Vm{
                     self.pc = self.registers[self.next_8_bits() as usize] as usize;
                 }
             },
+            Opcode::NOP =>{
+                self.next_8_bits();
+                self.next_8_bits();
+                self.next_8_bits();
+            },
             
             _ => {
                 println!("This is not an opcode");
@@ -245,6 +250,7 @@ mod tests{
         vm.run();
         assert!(!vm.equal_flag);
     }
+
     #[test]
     fn test_jeq_and_jneq_opcode() {
         let mut vm = Vm::new();
@@ -258,7 +264,14 @@ mod tests{
         vm.equal_flag = false;
         vm.run_once();
         assert_eq!(vm.pc,1);
-        
+    }
+
+    #[test]
+    fn test_nop_opcode() {
+        let mut vm = Vm::new();
+        vm.program = vec![16,0,0,0,1,0,0,1];
+        vm.run_once();
+        assert_eq!(vm.pc,4);
     }
 
 }

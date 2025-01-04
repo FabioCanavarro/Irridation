@@ -1,7 +1,8 @@
-use nom::types::CompleteStr;
+#![allow(dead_code)]
 
+use nom::types::CompleteStr;
 use crate::assembler::program_parser::program;
-use crate::vm::{self, Vm}; 
+use crate::vm::Vm; 
 use std::io;
 use std::io::Write;
 use std::num::ParseIntError;
@@ -25,22 +26,22 @@ impl Repl{
             command_buffer: vec![]
         }
     }
-fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError>{
-    let split = i.split(" ").collect::<Vec<&str>>();
-    let mut results: Vec<u8> = vec![];
-    for hex_string in split {
-        let byte = u8::from_str_radix(hex_string, 16);
-        match byte {
-            Ok(result) => {
-                results.push(result);
-            },
-            Err(e) => {
-                return Err(e);
+    fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError>{
+        let split = i.split(" ").collect::<Vec<&str>>();
+        let mut results: Vec<u8> = vec![];
+        for hex_string in split {
+            let byte = u8::from_str_radix(hex_string, 16);
+            match byte {
+                Ok(result) => {
+                    results.push(result);
+                },
+                Err(e) => {
+                    return Err(e);
+                }
             }
         }
+        Ok(results)
     }
-    Ok(results)
-}
     pub fn run(&mut self){
         println!("Welcome to Iridation, This is the REPL, HAVE FUN!!!");
         loop{
@@ -71,7 +72,7 @@ fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError>{
                 },
                 _ => {
                     let parsed_program = program(CompleteStr(buffer));
-                    if !parsed_program.is_ok(){
+                    if parsed_program.is_err(){
                         println!("Unable to parse input");
                         continue;
                     }

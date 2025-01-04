@@ -30,6 +30,7 @@ named!(pub program<CompleteStr,Program>,
     )
 );
 
+#[cfg(test)]
 mod tests{
     use super::*;
 

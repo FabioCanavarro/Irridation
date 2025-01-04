@@ -63,6 +63,7 @@ named!(pub instruction_one<CompleteStr,AssemblerInstruction>,
     )
 );
 
+#[cfg(test)]
 mod tests{
     use super::*;
     use crate::instruction::Opcode;
