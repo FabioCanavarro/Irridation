@@ -1,4 +1,7 @@
-use crate::vm::Vm; 
+use nom::types::CompleteStr;
+
+use crate::assembler::program_parser::program;
+use crate::vm::{self, Vm}; 
 use std::io;
 use std::io::Write;
 use std::num::ParseIntError;
@@ -67,15 +70,19 @@ fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError>{
                     println!("End of registers listing");
                 },
                 _ => {
-                    let result = self.parse_hex(buffer);
-                    match result{
-                        Ok(byte) => {
-                            byte.into_iter().for_each(|x| self.vm.add_byte(x))
-                        },
-                        Err(_) => println!("Unable to decode hex string, please enter 4 group of 2 hex char")
+                    let parsed_program = program(CompleteStr(buffer));
+                    if !parsed_program.is_ok(){
+                        println!("Unable to parse input");
+                        continue;
+                    }
+                    let (_,result) = parsed_program.unwrap();
+                    let bytecode = result.to_bytes();
+                    for byte in bytecode{
+                        self.vm.add_byte(byte);
                     }
                     self.vm.run_once();
-                } 
+
+               } 
             } 
         } 
     } 

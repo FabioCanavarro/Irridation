@@ -1,4 +1,4 @@
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone, Copy)]
 pub enum Opcode{
     HLT,
     IGL, // illegal
@@ -55,7 +55,30 @@ impl From<u8> for Opcode{
     }
 }
 
-
+impl From<Opcode> for u8 {
+    fn from(code: Opcode) -> u8 {
+        match code {
+            Opcode::LOAD => 0,  // Maps LOAD back to 0
+            Opcode::ADD => 1,   // Maps ADD back to 1
+            Opcode::SUB => 2,   // Maps SUB back to 2
+            Opcode::MUL => 3,   // Maps MUL back to 3
+            Opcode::DIV => 4,   // Maps DIV back to 4
+            Opcode::JMP => 5,   // Maps JMP back to 5
+            Opcode::JMPF => 6,  // Maps JMPF back to 6
+            Opcode::JMPB => 7,  // Maps JMPB back to 7
+            Opcode::EQ => 8,    // Maps EQ back to 8
+            Opcode::NEQ => 9,   // Maps NEQ back to 9
+            Opcode::GT => 10,   // Maps GT back to 10
+            Opcode::LT => 11,   // Maps LT back to 11
+            Opcode::GTQ => 12,  // Maps GTQ back to 12
+            Opcode::LTQ => 13,  // Maps LTQ back to 13
+            Opcode::JEQ => 14,  // Maps JEQ back to 14
+            Opcode::JNEQ => 15, // Maps JNEQ back to 15
+            Opcode::IGL => 255,  // For illegal instructions, we could use a sentinel value like 255
+            Opcode::HLT => 254
+        }
+    }
+}
 
 
 #[cfg(test)]
