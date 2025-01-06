@@ -1,3 +1,6 @@
+
+
+
 use crate::instruction::Opcode;
 // Emulate cpu
 #[derive(Debug,PartialEq)]
@@ -130,9 +133,8 @@ impl Vm{
     }
 
     pub fn run(&mut self){
-        let mut done: bool = false;
-        while !done{
-            done = self.execute_once();
+        while self.pc <= self.program.len(){
+            self.execute_once();
         }
     }
 
@@ -172,7 +174,6 @@ impl Vm{
         self.program.append(&mut v)
     }
 
-
 }
 
 # [cfg(test)]
@@ -209,6 +210,24 @@ mod tests{
         vm.program = vec![0,0,1,244];
         vm.run();
         assert_eq!(vm.registers[0],500);
+    }
+
+    #[test]
+    fn test_add_opcode() {
+        let mut vm = Vm::new();
+        // Load 1 into register 0
+        vm.add_bytes(vec![0, 0, 0, 1]);
+        // Load 2 into register 1
+        vm.add_bytes(vec![0, 1, 0, 2]);
+        // Add register 0 and register 1, store result in register 2
+        vm.add_bytes(vec![1, 0, 1, 2]);
+
+        vm.run_once(); // Run the entire program
+        vm.run_once();
+        vm.run_once();
+
+        vm.registers.iter().for_each(|x| println!("{}", x));
+        assert_eq!(vm.registers[2], 3); // Corrected assertion: 1 + 2 = 3
     }
 
     #[test]

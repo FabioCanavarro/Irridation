@@ -54,6 +54,7 @@ impl From<u8> for Opcode{
         14 => Opcode::JEQ,
         15 => Opcode::JNEQ,
         16 => Opcode::NOP,
+        254 => Opcode::HLT,
         _ => Opcode::IGL
         }
     }

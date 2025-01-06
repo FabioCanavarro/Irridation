@@ -82,7 +82,6 @@ impl Repl{
                         self.vm.add_byte(byte);
                     }
                     self.vm.run_once();
-
                } 
             } 
         } 

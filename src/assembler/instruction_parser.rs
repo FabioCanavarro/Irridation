@@ -3,6 +3,7 @@ use super::register_parser::*;
 use super::operand_parser::*;
 use super::Token;
 use nom::types::CompleteStr;
+use nom::multispace;
 
 #[derive(PartialEq,Debug)]
 pub struct AssemblerInstruction{
@@ -47,7 +48,7 @@ impl AssemblerInstruction{
     }
 }
 
-named!(pub instruction_one<CompleteStr,AssemblerInstruction>,
+named!(instruction_one<CompleteStr,AssemblerInstruction>,
     do_parse!(
         o: opcode_load >>
         r: register >>
@@ -59,6 +60,52 @@ named!(pub instruction_one<CompleteStr,AssemblerInstruction>,
                 operand2: Some(i),
                 operand3: None
             }
+        )
+    )
+);
+
+named!(instruction_two<CompleteStr,AssemblerInstruction>,
+    do_parse!(
+        o: opcode >>
+        opt!(multispace) >>
+        (
+            AssemblerInstruction{
+            opcode: o,
+            operand1: None,
+            operand2: None,
+            operand3: None
+            }
+    )
+));
+
+
+named!(instruction_three<CompleteStr,AssemblerInstruction>,
+    do_parse!(
+        o: opcode >>
+        r1: register >>
+        r2: register >>
+        r3: register >>
+        (
+            AssemblerInstruction{
+                opcode: o,
+                operand1: Some(r1),
+                operand2: Some(r2),
+                operand3: Some(r3),
+            }
+        )
+    )
+);
+
+named!(pub instruction<CompleteStr,AssemblerInstruction>,
+    do_parse!(
+        ins: alt!(
+
+            instruction_three |
+            instruction_one |
+            instruction_two
+        ) >> 
+        (
+            ins
         )
     )
 );
@@ -102,4 +149,34 @@ mod tests{
         
         assert_eq!(code_value, 0);  // Test against stored value
     }
+
+    #[test]
+    fn test_parse_instruction_no_operand() {
+        let result = instruction_two(CompleteStr("hlt\n"));
+        assert!(result.is_ok());
+        let (_,res) = result.unwrap();
+        assert_eq!(res,AssemblerInstruction{opcode: Token::Op { code: Opcode::HLT },operand1:None,operand2:None,operand3:None});
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
