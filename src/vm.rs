@@ -133,10 +133,12 @@ impl Vm{
     }
 
     pub fn run(&mut self){
-        while self.pc <= self.program.len(){
-            self.execute_once();
+        let mut done: bool = false;
+        while !done{
+            done = self.execute_once();
         }
     }
+
 
     fn execute_once(&mut self) -> bool{
         if self.pc >= self.program.len(){
