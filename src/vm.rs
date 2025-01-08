@@ -131,6 +131,18 @@ impl Vm{
                 let new_heap_size = self.heap.len() as i32 + register;
                 self.heap.resize(new_heap_size as usize, 0);
             },
+            Opcode::INC =>{
+                self.registers[self.next_8_bits() as usize] += 1;
+                self.next_8_bits();
+                self.next_8_bits();
+                
+            },
+            Opcode::DEC => {
+                self.registers[self.next_8_bits() as usize] -= 1;
+                self.next_8_bits();
+                self.next_8_bits();
+                
+            },
             _ => {
                 println!("This is not an opcode");
                 return true;
@@ -307,6 +319,26 @@ mod tests{
         vm.run_once();
 
         assert_eq!(vm.heap.len(),100);
+    }
+
+    #[test]
+    fn test_inc_opcode() {
+        let mut vm = Vm::new();
+        vm.registers[0] = 2;
+        vm.program = vec![18,0,0,0];
+        vm.run_once();
+
+        assert_eq!(vm.registers[0],3);
+    }
+
+    #[test]
+    fn test_dec_opcode() {
+        let mut vm = Vm::new();
+        vm.registers[0] = 2;
+        vm.program = vec![19,0,0,0];
+        vm.run_once();
+
+        assert_eq!(vm.registers[0],1);
     }
 }
 
