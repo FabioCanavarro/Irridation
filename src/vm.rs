@@ -127,8 +127,11 @@ impl Vm{
                 self.next_8_bits();
                 self.next_8_bits();
             },
-            
-            
+            Opcode::AlOC => {
+                let register = self.registers[self.next_8_bits() as usize];
+                let new_heap_size = self.heap.len() as i32 + register;
+                self.heap.resize(new_heap_size as usize, 0);
+            },
             _ => {
                 println!("This is not an opcode");
             }       
@@ -231,7 +234,6 @@ mod tests{
         vm.run_once();
         vm.run_once();
 
-        vm.registers.iter().for_each(|x| println!("{}", x));
         assert_eq!(vm.registers[2], 3); // Corrected assertion: 1 + 2 = 3
     }
 
@@ -298,5 +300,33 @@ mod tests{
         assert_eq!(vm.pc,4);
     }
 
+    #[test]
+    fn test_aloc_opcode() {
+        let mut vm = Vm::new();
+        vm.registers[0] = 100;
+        vm.program = vec![17,0,0,0];
+        vm.run_once();
+
+        assert_eq!(vm.heap.len(),100);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
