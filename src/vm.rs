@@ -1,6 +1,8 @@
 
 
 
+use nom::print;
+
 use crate::instruction::Opcode;
 // Emulate cpu
 #[derive(Debug,PartialEq)]
@@ -36,7 +38,7 @@ impl Vm{
         opcode
     }
 
-    fn match_opcode(&mut self,opcode: Opcode){
+    fn match_opcode(&mut self,opcode: Opcode) -> bool{
         match opcode{
             Opcode::LOAD =>{
                 let register: usize = self.next_8_bits() as usize;
@@ -134,8 +136,10 @@ impl Vm{
             },
             _ => {
                 println!("This is not an opcode");
+                return true;
             }       
         }
+        false
     }
 
     pub fn run(&mut self){
@@ -147,14 +151,12 @@ impl Vm{
 
 
     fn execute_once(&mut self) -> bool{
-        if self.pc >= self.program.len(){
-            return false;
+        if self.pc >= (self.program.len() - 1){
+            return true;
         }
         let opcode = self.decode_opcode();
-        self.match_opcode(opcode);
-        true
-    }
-
+        self.match_opcode(opcode)
+}
 
     pub fn run_once(&mut self){
         self.execute_once();
@@ -162,8 +164,10 @@ impl Vm{
 
 
     pub fn next_8_bits(&mut self) -> u8{
+        println!("{}",self.pc);
         let result: u8 = self.program[self.pc];
         self.pc +=1;
+        
         result
     }
 
@@ -230,10 +234,9 @@ mod tests{
         // Add register 0 and register 1, store result in register 2
         vm.add_bytes(vec![1, 0, 1, 2]);
 
-        vm.run_once(); // Run the entire program
-        vm.run_once();
-        vm.run_once();
-
+        vm.run();
+        
+        vm.registers.iter().for_each(|x| println!("{}",x));
         assert_eq!(vm.registers[2], 3); // Corrected assertion: 1 + 2 = 3
     }
 
@@ -250,7 +253,7 @@ mod tests{
         let mut vm = Vm::new();
         vm.registers[0] = 1;
         vm.program = vec![7,0,0,0];
-        vm.execute_once();
+        vm.run_once();
         assert_eq!(vm.pc,1);
     }
 
