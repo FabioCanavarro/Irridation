@@ -7,6 +7,7 @@ use crate::instruction::Opcode;
 pub struct Vm {
     pub registers: [i32; 32],
     pc: usize,
+    heap: Vec<u8>,
     pub program: Vec<u8>,
     remainder: u32,
     equal_flag: bool
@@ -21,6 +22,7 @@ impl Vm{
         Vm{
             registers:[0; 32],
             pc: 0,
+            heap: vec![],
             program: vec![],
             remainder: 0,
             equal_flag: false
@@ -125,6 +127,7 @@ impl Vm{
                 self.next_8_bits();
                 self.next_8_bits();
             },
+            
             
             _ => {
                 println!("This is not an opcode");

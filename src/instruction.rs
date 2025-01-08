@@ -20,7 +20,8 @@ pub enum Opcode{
     LTQ,
     JEQ,
     JNEQ,
-    NOP
+    NOP,
+    AlOC
 }
 
 #[derive(Debug,PartialEq)]
@@ -54,6 +55,7 @@ impl From<u8> for Opcode{
         14 => Opcode::JEQ,
         15 => Opcode::JNEQ,
         16 => Opcode::NOP,
+        17 => Opcode::AlOC,
         254 => Opcode::HLT,
         _ => Opcode::IGL
         }
@@ -80,6 +82,7 @@ impl From<Opcode> for u8 {
             Opcode::JEQ => 14,  // Maps JEQ back to 14
             Opcode::JNEQ => 15, // Maps JNEQ back to 15
             Opcode::NOP => 16,
+            Opcode::AlOC => 17,
             Opcode::IGL => 255,  // For illegal instructions, we could use a sentinel value like 255
             Opcode::HLT => 254
         }
@@ -107,6 +110,7 @@ impl<'a> From<CompleteStr<'a>> for Opcode{
             CompleteStr("jeq") => Opcode::JEQ,
             CompleteStr("jneq") => Opcode::JNEQ,
             CompleteStr("nop") => Opcode::NOP,
+            CompleteStr("aloc") => Opcode::AlOC,
             _ => Opcode::IGL,
         }
     }
