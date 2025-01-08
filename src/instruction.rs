@@ -21,7 +21,9 @@ pub enum Opcode{
     JEQ,
     JNEQ,
     NOP,
-    AlOC
+    AlOC,
+    INC,
+    DEC
 }
 
 #[derive(Debug,PartialEq)]
@@ -56,6 +58,8 @@ impl From<u8> for Opcode{
         15 => Opcode::JNEQ,
         16 => Opcode::NOP,
         17 => Opcode::AlOC,
+        18 => Opcode::INC,
+        19 => Opcode::DEC,
         254 => Opcode::HLT,
         _ => Opcode::IGL
         }
@@ -83,6 +87,8 @@ impl From<Opcode> for u8 {
             Opcode::JNEQ => 15, // Maps JNEQ back to 15
             Opcode::NOP => 16,
             Opcode::AlOC => 17,
+            Opcode::INC => 18,
+            Opcode::DEC => 19,
             Opcode::IGL => 255,  // For illegal instructions, we could use a sentinel value like 255
             Opcode::HLT => 254
         }
@@ -91,6 +97,8 @@ impl From<Opcode> for u8 {
 
 impl<'a> From<CompleteStr<'a>> for Opcode{
     fn from(value: CompleteStr) -> Self {
+        let opcode = value.to_string().to_lowercase();
+        let value = CompleteStr(&opcode);
         match value{
             CompleteStr("load") => Opcode::LOAD,
             CompleteStr("add") => Opcode::ADD,
@@ -111,6 +119,8 @@ impl<'a> From<CompleteStr<'a>> for Opcode{
             CompleteStr("jneq") => Opcode::JNEQ,
             CompleteStr("nop") => Opcode::NOP,
             CompleteStr("aloc") => Opcode::AlOC,
+            CompleteStr("inc") => Opcode::INC,
+            CompleteStr("dec") => Opcode::DEC,
             _ => Opcode::IGL,
         }
     }

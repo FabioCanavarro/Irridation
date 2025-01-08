@@ -25,8 +25,20 @@ impl AssemblerInstruction{
         }
 
         for i in [&self.operand1,&self.operand2,&self.operand3]{
+            // println!("Operand: {:?}",i);
             if let Some(t) = i{AssemblerInstruction::extract_operand(t, &mut result)}
         }
+
+        // Incase the result is not an array witha  length of 4
+        while result.len() < 4{
+            result.push(0);
+        }
+        
+        // Debugging
+        // println!("opcode {:?}",self.opcode);
+        // result.iter().for_each(|x| println!("{}", x));
+
+        // ToDo Doesnt work with CAPITAL OPCODE for some reason
         result
     }
 
@@ -50,7 +62,7 @@ impl AssemblerInstruction{
 
 named!(instruction_one<CompleteStr,AssemblerInstruction>,
     do_parse!(
-        o: opcode_load >>
+        o: opcode >>
         r: register >>
         i: interger_operand >>
         (

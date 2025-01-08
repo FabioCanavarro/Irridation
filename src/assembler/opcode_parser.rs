@@ -39,7 +39,7 @@ mod tests{
     
     #[test]
     fn test_parse_opcode() {
-        let result = opcode(CompleteStr("load"));
+        let result = opcode(CompleteStr("LOAD"));
         assert!(result.is_ok());
         let (_,token) = result.unwrap();
         assert_eq!(token,Token::Op { code: Opcode::LOAD });

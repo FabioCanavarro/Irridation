@@ -1,9 +1,6 @@
-
-
-
-use nom::print;
-
 use crate::instruction::Opcode;
+
+
 // Emulate cpu
 #[derive(Debug,PartialEq)]
 pub struct Vm {
@@ -164,7 +161,6 @@ impl Vm{
 
 
     pub fn next_8_bits(&mut self) -> u8{
-        println!("{}",self.pc);
         let result: u8 = self.program[self.pc];
         self.pc +=1;
         
