@@ -5,6 +5,7 @@ pub mod register_parser;
 pub mod instruction_parser;
 pub mod program_parser;
 pub mod directive_parsers;
+pub mod label_parsers;
 
 #[derive(Debug,PartialEq)]
 pub enum Token{

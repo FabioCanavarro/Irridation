@@ -1,10 +1,11 @@
 use super::opcode_parser::*;
 use super::register_parser::*;
 use super::operand_parser::*;
+use super::directive_parsers::*;
+use super::label_parsers::*;
 use super::Token;
 use nom::types::CompleteStr;
 use nom::multispace;
-use super::directive_parsers::directive;
 
 #[derive(PartialEq,Debug)]
 pub struct AssemblerInstruction{
