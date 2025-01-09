@@ -3,10 +3,11 @@
 use nom::types::CompleteStr;
 use crate::assembler::program_parser::program;
 use crate::vm::Vm; 
-use std::io;
+use std::fs::File;
+use std::io::{self, Read};
 use std::io::Write;
 use std::num::ParseIntError;
-
+use std::path::Path;
 
 pub struct Repl{
     vm: Vm,
@@ -73,7 +74,26 @@ impl Repl{
                 ".clear" =>{
                     self.vm.program = vec![];
                     println!("VM program vector is cleared!!!");
-                }
+                },
+                ".load_file" =>{
+                    print!("Please enter the path to the file: ");
+                    io::stdout().flush().expect("Unable to flush");
+                    let mut tmp =String::new();
+                    stdin.read_line(&mut tmp).expect("Unable to read the line");
+                    let tmp = tmp.trim();
+                    let filename = Path::new(&tmp);
+                    let mut f = File::open(Path::new(&filename)).expect("File not found");
+                    let mut contents = String::new();
+                    f.read_to_string(&mut contents).expect("Error while reading the file");
+                    let program = match program(CompleteStr(&contents)) {
+                        Ok((_, program)) => program,
+                        Err(e) => {
+                            println!("Unable to parse input {:?}",e);
+                            continue;
+                        }
+                    };
+                    self.vm.program.append(&mut program.to_bytes());
+                },
                 _ => {
                     let parsed_program = program(CompleteStr(buffer));
                     if parsed_program.is_err(){
