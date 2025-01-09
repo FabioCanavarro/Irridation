@@ -19,12 +19,12 @@ pub struct AssemblerInstruction{
 impl AssemblerInstruction{
     pub fn to_bytes(&self) -> Vec<u8>{
         let mut result = vec![];
-        match &self.opcode){
-            Token::Op { code } => {
+        match &self.opcode{
+            Some(Token::Op { code }) => {
                 let byte: u8 = u8::from(*code);  // Explicitly use From<Opcode> for u8
                 result.push(byte);
-            }
-        _ => {println!("Non opcode found in opcode field");std::process::exit(1)}
+            },
+            _ => {println!("Non opcode found in opcode field");std::process::exit(1)}
         }
 
         for i in [&self.operand1,&self.operand2,&self.operand3]{
@@ -117,16 +117,16 @@ named!(instruction_three<CompleteStr,AssemblerInstruction>,
     )
 );
 
-named!(instruction_combined<CompleteStr,AssemblerInstruction>,
+named!(instruction_four<CompleteStr,AssemblerInstruction>,
     do_parse!(
-        l: opt!(label) >>
+        l: opt!(label_declaration) >>
         o: opcode >>
         o1: opt!(operand)>>
         o2: opt!(operand) >>
         o3: opt!(operand) >>
         (
             AssemblerInstruction{
-                opcode: Some(o)
+                opcode: Some(o),
                 label: l,
                 directive: None,
                 operand1: o1,
@@ -136,13 +136,14 @@ named!(instruction_combined<CompleteStr,AssemblerInstruction>,
         )
     )
 );
-named!(pub instruction<CompleteStr,AssemblerInstruction>,
+named!(pub instruction_combined<CompleteStr,AssemblerInstruction>,
     do_parse!(
         ins: alt!(
 
             instruction_three |
             instruction_one |
-            instruction_two
+            instruction_two |
+            instruction_four
         ) >> 
         (
             ins
@@ -150,11 +151,11 @@ named!(pub instruction<CompleteStr,AssemblerInstruction>,
     )
 );
 
-/// Will try to parse out any of the Instruction forms
+// Will try to parse out any of the Instruction forms
 named!(pub instruction<CompleteStr, AssemblerInstruction>,
     do_parse!(
         ins: alt!(
-            instruction |
+            instruction_combined |
             directive
         ) >>
         (
@@ -175,7 +176,9 @@ mod tests{
         (
             CompleteStr(""),
             AssemblerInstruction{
-                opcode: Token::Op { code: Opcode::LOAD },
+                label: None,
+                directive: None,
+                opcode: Some(Token::Op { code: Opcode::LOAD}),
                 operand1: Some(Token::Register { reg: 0 }),
                 operand2: Some(Token::IntergerOperand { val: 100 }),
                 operand3: None
@@ -189,7 +192,7 @@ mod tests{
         println!("Opcode: {:?}", result.opcode);  // Added debug print
         
         let code_value = match result.opcode {  // Store intermediate value
-            Token::Op { code } => {
+            Some(Token::Op { code }) => {
                 let value = u8::from(code);     // Explicit conversion using From trait
                 println!("Converted value: {}", value);  // Added debug print
                 value
@@ -208,7 +211,15 @@ mod tests{
         let result = instruction_two(CompleteStr("hlt\n"));
         assert!(result.is_ok());
         let (_,res) = result.unwrap();
-        assert_eq!(res,AssemblerInstruction{opcode: Token::Op { code: Opcode::HLT },operand1:None,operand2:None,operand3:None});
+        assert_eq!(res,AssemblerInstruction{
+            opcode: Some(Token::Op{ code: Opcode::HLT}),
+            label: None,
+            directive: None,
+            operand1:None,
+            operand2:None,
+            operand3:None}
+        );
+
     }
 }
 

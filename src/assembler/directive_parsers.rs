@@ -14,10 +14,10 @@ named!(directive_declaration<CompleteStr,Token>,
     )
 );
 
-named!(directive_combined<CompleteStr,Token>,
+named!(directive_combined<CompleteStr,AssemblerInstruction>,
     do_parse!(
         tag!(".") >>
-        directive: directive_declaration >>
+        name: directive_declaration >>
         o1: opt!(operand) >>
         o2: opt!(operand) >>
         o3: opt!(operand) >>
@@ -34,7 +34,7 @@ named!(directive_combined<CompleteStr,Token>,
     )
 );
 
-named!(pub directive<CompleteStr,Token>,
+named!(pub directive<CompleteStr,AssemblerInstruction>,
     do_parse!(
     ins: alt!(
         directive_combined
