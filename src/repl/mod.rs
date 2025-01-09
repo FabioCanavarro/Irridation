@@ -70,6 +70,10 @@ impl Repl{
                     println!("{:#?}",self.vm.registers);
                     println!("End of registers listing");
                 },
+                ".clear" =>{
+                    self.vm.program = vec![];
+                    println!("VM program vector is cleared!!!");
+                }
                 _ => {
                     let parsed_program = program(CompleteStr(buffer));
                     if parsed_program.is_err(){

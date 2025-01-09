@@ -90,7 +90,6 @@ impl Vm{
                 let val2 = self.registers[self.next_8_bits() as usize];
                 self.equal_flag = val1 > val2;
                 self.next_8_bits();
- 
             },
             Opcode::LT =>{
                 let val1 = self.registers[self.next_8_bits() as usize];
