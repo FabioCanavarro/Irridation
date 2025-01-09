@@ -4,19 +4,22 @@ use super::operand_parser::*;
 use super::Token;
 use nom::types::CompleteStr;
 use nom::multispace;
+use super::directive_parsers::directive;
 
 #[derive(PartialEq,Debug)]
 pub struct AssemblerInstruction{
-    opcode: Token,
-    operand1: Option<Token>,
-    operand2: Option<Token>,
-    operand3: Option<Token>,
+    pub opcode: Option<Token>,
+    pub label: Option<Token>,
+    pub directive: Option<Token>, 
+    pub operand1: Option<Token>,
+    pub operand2: Option<Token>,
+    pub operand3: Option<Token>,
 }
 
 impl AssemblerInstruction{
     pub fn to_bytes(&self) -> Vec<u8>{
         let mut result = vec![];
-        match &self.opcode{
+        match &self.opcode){
             Token::Op { code } => {
                 let byte: u8 = u8::from(*code);  // Explicitly use From<Opcode> for u8
                 result.push(byte);
@@ -67,7 +70,9 @@ named!(instruction_one<CompleteStr,AssemblerInstruction>,
         i: interger_operand >>
         (
             AssemblerInstruction{
-                opcode: o,
+                label: None,
+                directive: None,
+                opcode: Some(o),
                 operand1: Some(r),
                 operand2: Some(i),
                 operand3: None
@@ -82,7 +87,9 @@ named!(instruction_two<CompleteStr,AssemblerInstruction>,
         opt!(multispace) >>
         (
             AssemblerInstruction{
-            opcode: o,
+            label: None,
+            directive: None,
+            opcode: Some(o),
             operand1: None,
             operand2: None,
             operand3: None
@@ -99,7 +106,9 @@ named!(instruction_three<CompleteStr,AssemblerInstruction>,
         r3: register >>
         (
             AssemblerInstruction{
-                opcode: o,
+                label: None,
+                directive: None,
+                opcode: Some(o),
                 operand1: Some(r1),
                 operand2: Some(r2),
                 operand3: Some(r3),
@@ -108,6 +117,25 @@ named!(instruction_three<CompleteStr,AssemblerInstruction>,
     )
 );
 
+named!(instruction_combined<CompleteStr,AssemblerInstruction>,
+    do_parse!(
+        l: opt!(label) >>
+        o: opcode >>
+        o1: opt!(operand)>>
+        o2: opt!(operand) >>
+        o3: opt!(operand) >>
+        (
+            AssemblerInstruction{
+                opcode: Some(o)
+                label: l,
+                directive: None,
+                operand1: o1,
+                operand2: o2,
+                operand3: o3
+            }
+        )
+    )
+);
 named!(pub instruction<CompleteStr,AssemblerInstruction>,
     do_parse!(
         ins: alt!(
@@ -116,6 +144,19 @@ named!(pub instruction<CompleteStr,AssemblerInstruction>,
             instruction_one |
             instruction_two
         ) >> 
+        (
+            ins
+        )
+    )
+);
+
+/// Will try to parse out any of the Instruction forms
+named!(pub instruction<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        ins: alt!(
+            instruction |
+            directive
+        ) >>
         (
             ins
         )

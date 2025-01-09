@@ -1,7 +1,7 @@
 use nom::types::CompleteStr;
 use crate::assembler::Token;
 use nom::digit;
-
+use super::register_parser::register;
 
 named!(
     pub interger_operand<CompleteStr,Token>,
@@ -14,6 +14,14 @@ named!(
                     }
             )
         )
+    )
+);
+
+named!(
+    pub operand<CompleteStr,Token>,
+    alt!(
+        interger_operand|
+        register
     )
 );
 
