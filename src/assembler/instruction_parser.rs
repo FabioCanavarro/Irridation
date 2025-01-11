@@ -3,6 +3,7 @@ use super::register_parser::*;
 use super::operand_parser::*;
 use super::directive_parsers::*;
 use super::label_parsers::*;
+use super::SymbolTable;
 use super::Token;
 use nom::types::CompleteStr;
 use nom::multispace;
@@ -18,7 +19,7 @@ pub struct AssemblerInstruction{
 }
 
 impl AssemblerInstruction{
-    pub fn to_bytes(&self) -> Vec<u8>{
+    pub fn to_bytes(&self, symbol_table: &SymbolTable) -> Vec<u8>{
         let mut result = vec![];
         match &self.opcode{
             Some(Token::Op { code }) => {
@@ -73,6 +74,18 @@ impl AssemblerInstruction{
 
     pub fn is_directive(&self) -> bool{
         self.directive.is_some()
+    }
+
+    pub fn label_name(&self) -> Option<String>{
+        match &self.label{
+            Some(l) => {
+                match l{
+                    Token::LabelDeclaration { name } => Some(name.clone()),
+                    _ => None
+                }
+            },
+            None => None
+        }
     }
 }
 

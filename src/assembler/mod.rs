@@ -1,3 +1,5 @@
+use program_parser::Program;
+
 use crate::instruction::Opcode;
 pub mod opcode_parser;
 pub mod operand_parser;
@@ -49,19 +51,36 @@ pub enum AssemblerPhase {
 
 // SymbolTable
 #[derive(Debug)]
-pub enum SymbolTable{
-    First
+pub struct SymbolTable{
+    symbols: Vec<Symbol>
+}
+
+impl Default for SymbolTable{
+    fn default() -> Self{
+        Self::new()
+    }
 }
 
 impl SymbolTable{
     pub fn new() -> SymbolTable{
-        SymbolTable::First
+        SymbolTable{
+            symbols: vec![]
+        }
     }
-}
 
+    pub fn add_symbols(&mut self, symbol: Symbol){
+        self.symbols.push(symbol);
+    }
+    
+    pub fn symbol_value(&self, symbol: Symbol) -> Option<u32>{
+        for i in &self.symbols{
+            if i.name == symbol.name{
+                return Some(symbol.offset)
+            }
+        }
+        None
+    }
 
-impl Default for SymbolTable{
-    fn default() -> Self {Self::new()}
 }
 
 
@@ -69,7 +88,7 @@ impl Default for SymbolTable{
 #[derive(Debug)]
 pub struct Assembler{
     pub phase: AssemblerPhase,
-    pub symbols: SymbolTable
+    pub symbol_table: SymbolTable
 }
 
 impl Default for Assembler{
@@ -80,8 +99,53 @@ impl Assembler{
     pub fn new () -> Assembler{
         Assembler{
             phase: AssemblerPhase::First,
-            symbols: SymbolTable::new()
+            symbol_table: SymbolTable::new()
+        }
+    }
+    
+    pub fn extract_label(&mut self, p: &Program){
+        let mut c = 0;
+        for i in &p.instructions{
+            if i.is_label(){
+                if let Some(name) = i.label_name(){
+                    self.symbol_table.symbols.push(Symbol { name, symbol_type: SymbolType::Label, offset: c})
+                }
+            }
+            c+=4;
         }
     }
 
+    pub fn process_first_phase(&mut self, p: &Program){
+        self.extract_label(p);
+        self.phase = AssemblerPhase::Second;
+    }
+
+    pub fn process_second_phase(&mut self, p: &Program) -> Vec<u8>{
+        let mut program = vec![];
+        for i in &p.instructions{
+            let mut bytes = i.to_bytes(&self.symbol_table);
+            program.append(&mut bytes);
+        }
+        program
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
