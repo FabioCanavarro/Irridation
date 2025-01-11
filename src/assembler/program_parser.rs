@@ -1,5 +1,6 @@
 use nom::types::CompleteStr;
 use super::instruction_parser::{instruction, AssemblerInstruction};
+use super::SymbolTable;
 
 
 #[derive(Debug,PartialEq)]
@@ -11,7 +12,7 @@ impl Program{
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut program = vec![];
         for instruction in &self.instructions{
-            program.append(&mut instruction.to_bytes());
+            program.append(&mut instruction.to_bytes(&SymbolTable::new()));
         }
         program
     }
