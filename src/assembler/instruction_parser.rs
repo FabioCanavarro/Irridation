@@ -62,6 +62,18 @@ impl AssemblerInstruction{
             }
         }
     }
+
+    pub fn is_label(&self) -> bool{
+        self.label.is_some()
+    }
+
+    pub fn is_opcode(&self) -> bool{
+        self.opcode.is_some()
+    }
+
+    pub fn is_directive(&self) -> bool{
+        self.directive.is_some()
+    }
 }
 
 named!(instruction_one<CompleteStr,AssemblerInstruction>,

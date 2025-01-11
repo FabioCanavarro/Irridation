@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::instruction::Opcode;
 pub mod opcode_parser;
 pub mod operand_parser;
@@ -19,7 +17,28 @@ pub enum Token{
     Directive{name: String}
 }
 
+// Symbol
+#[derive(Debug)]
+pub struct Symbol {
+    name: String,
+    symbol_type: SymbolType,
+    offset: u32
+}
 
+impl Symbol{
+    pub fn new(name: String, symbol_type: SymbolType, offset: u32) -> Symbol{
+        Symbol{name,symbol_type,offset}
+    }
+}
+
+// SymbolType
+#[derive(Debug)]
+pub enum SymbolType {
+    Label,
+}
+
+
+// AssemblerPhase
 #[derive(Debug, PartialEq, Clone, Default)]
 pub enum AssemblerPhase {
     #[default]
@@ -28,6 +47,7 @@ pub enum AssemblerPhase {
 }
 
 
+// SymbolTable
 #[derive(Debug)]
 pub enum SymbolTable{
     First
@@ -44,10 +64,16 @@ impl Default for SymbolTable{
     fn default() -> Self {Self::new()}
 }
 
+
+// Assembler
 #[derive(Debug)]
 pub struct Assembler{
     pub phase: AssemblerPhase,
     pub symbols: SymbolTable
+}
+
+impl Default for Assembler{
+    fn default() -> Self {Self::new()}
 }
 
 impl Assembler{
@@ -57,10 +83,5 @@ impl Assembler{
             symbols: SymbolTable::new()
         }
     }
+
 }
-
-impl Default for Assembler{
-    fn default() -> Self {Self::new()}
-}
-
-
