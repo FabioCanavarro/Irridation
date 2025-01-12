@@ -1,5 +1,5 @@
-use program_parser::Program;
-
+use nom::types::CompleteStr;
+use program_parser::{program, Program};
 use crate::instruction::Opcode;
 pub mod opcode_parser;
 pub mod operand_parser;
@@ -72,10 +72,10 @@ impl SymbolTable{
         self.symbols.push(symbol);
     }
     
-    pub fn symbol_value(&self, symbol: Symbol) -> Option<u32>{
+    pub fn symbol_value(&self, symbol: &str) -> Option<u32>{
         for i in &self.symbols{
-            if i.name == symbol.name{
-                return Some(symbol.offset)
+            if i.name == symbol{
+                return Some(i.offset);
             }
         }
         None
@@ -129,13 +129,48 @@ impl Assembler{
         program
     }
 
+    pub fn assemble(&mut self,raw: &str) -> Option<Vec<u8>>{
+        match program(CompleteStr(raw)){
+            Ok((_,p)) => {
+                self.process_first_phase(&p);
+                Some(self.process_second_phase(&p))
+            }
+            Err(_) => None
+        }
+    }
+
 }
 
 
+#[cfg(test)]
+mod tests{
+    use crate::vm::Vm;
+    use super::*;
 
+    #[test]
+    fn test_create_symbol_table() {
+        let mut table = SymbolTable::new();
+        table.add_symbols(Symbol { name: "test".to_string(), symbol_type:SymbolType::Label, offset: 13});
+        assert_eq!(table.symbols.len(),1);
+        let symbol_val = table.symbol_value("test");
+        assert!(symbol_val.is_some());
+        assert_eq!(symbol_val.unwrap(),13);
+        let symbol_val = table.symbol_value("error");
+        assert!(symbol_val.is_none());
+    }
 
-
-
+    #[test]
+    fn test_assemble_program() {
+        let program: &str = "load $2 #10\n load $1 #20\n add $1 $2 $3\ntest: inc $1\n jmpe @test\n";
+        let mut assembler: Assembler = Assembler::new();
+        let result = assembler.assemble(program);
+        assert!(result.is_some());
+        let mut vm: Vm = Vm::new();
+        vm.add_bytes(result.unwrap());
+        // jmpe @test still doesnt increase byte lenght
+        assert_eq!(vm.program.len(),16);
+    }
+}
 
 
 
