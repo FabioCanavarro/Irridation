@@ -1,7 +1,7 @@
 use nom::types::CompleteStr;
 
-#[derive(Debug,PartialEq,Clone, Copy)]
-pub enum Opcode{
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Opcode {
     HLT,
     IGL, // illegal
     LOAD,
@@ -23,45 +23,45 @@ pub enum Opcode{
     NOP,
     AlOC,
     INC,
-    DEC
+    DEC,
 }
 
-#[derive(Debug,PartialEq)]
-pub struct Instruction{
-    opcode: Opcode
+#[derive(Debug, PartialEq)]
+pub struct Instruction {
+    opcode: Opcode,
 }
 
-impl Instruction{
-    pub fn new(opcode: Opcode) -> Instruction{
-        Instruction {opcode}
+impl Instruction {
+    pub fn new(opcode: Opcode) -> Instruction {
+        Instruction { opcode }
     }
 }
 
-impl From<u8> for Opcode{
-    fn from(v: u8)-> Self{
+impl From<u8> for Opcode {
+    fn from(v: u8) -> Self {
         match v {
-        0 => Opcode::LOAD,
-        1 => Opcode::ADD,
-        2 => Opcode::SUB,
-        3 => Opcode::MUL,
-        4 => Opcode::DIV,
-        5 => Opcode::JMP,
-        6 => Opcode::JMPF,
-        7 => Opcode::JMPB,
-        8 => Opcode::EQ,
-        9 => Opcode::NEQ,
-        10 => Opcode::GT,
-        11 => Opcode::LT,
-        12 => Opcode::GTQ,
-        13 => Opcode::LTQ,
-        14 => Opcode::JEQ,
-        15 => Opcode::JNEQ,
-        16 => Opcode::NOP,
-        17 => Opcode::AlOC,
-        18 => Opcode::INC,
-        19 => Opcode::DEC,
-        254 => Opcode::HLT,
-        _ => Opcode::IGL
+            0 => Opcode::LOAD,
+            1 => Opcode::ADD,
+            2 => Opcode::SUB,
+            3 => Opcode::MUL,
+            4 => Opcode::DIV,
+            5 => Opcode::JMP,
+            6 => Opcode::JMPF,
+            7 => Opcode::JMPB,
+            8 => Opcode::EQ,
+            9 => Opcode::NEQ,
+            10 => Opcode::GT,
+            11 => Opcode::LT,
+            12 => Opcode::GTQ,
+            13 => Opcode::LTQ,
+            14 => Opcode::JEQ,
+            15 => Opcode::JNEQ,
+            16 => Opcode::NOP,
+            17 => Opcode::AlOC,
+            18 => Opcode::INC,
+            19 => Opcode::DEC,
+            254 => Opcode::HLT,
+            _ => Opcode::IGL,
         }
     }
 }
@@ -89,17 +89,17 @@ impl From<Opcode> for u8 {
             Opcode::AlOC => 17,
             Opcode::INC => 18,
             Opcode::DEC => 19,
-            Opcode::IGL => 255,  // For illegal instructions, we could use a sentinel value like 255
-            Opcode::HLT => 254
+            Opcode::IGL => 255, // For illegal instructions, we could use a sentinel value like 255
+            Opcode::HLT => 254,
         }
     }
 }
 
-impl<'a> From<CompleteStr<'a>> for Opcode{
+impl<'a> From<CompleteStr<'a>> for Opcode {
     fn from(value: CompleteStr) -> Self {
         let opcode = value.to_string().to_lowercase();
         let value = CompleteStr(&opcode);
-        match value{
+        match value {
             CompleteStr("load") => Opcode::LOAD,
             CompleteStr("add") => Opcode::ADD,
             CompleteStr("sub") => Opcode::SUB,
@@ -126,21 +126,20 @@ impl<'a> From<CompleteStr<'a>> for Opcode{
     }
 }
 
-
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
     fn make_instruction() {
         let opcode = Opcode::HLT;
-        assert_eq!(opcode,Opcode::HLT );
+        assert_eq!(opcode, Opcode::HLT);
     }
 
     #[test]
     fn create_instruction() {
         let instruct = Instruction::new(Opcode::HLT);
-        assert_eq!(instruct.opcode,Opcode::HLT);
+        assert_eq!(instruct.opcode, Opcode::HLT);
     }
 
     #[test]

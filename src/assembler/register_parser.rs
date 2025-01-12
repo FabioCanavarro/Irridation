@@ -1,13 +1,13 @@
-use nom::types::CompleteStr;
 use crate::assembler::Token;
 use nom::digit;
+use nom::types::CompleteStr;
 
 named!(
     pub register <CompleteStr,Token>,
     ws!(
         do_parse!(
             tag!("$") >>
-            reg: digit >> 
+            reg: digit >>
             (
                 Token::Register{
                     reg: reg.parse::<u8>().unwrap()
@@ -18,7 +18,7 @@ named!(
 );
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]

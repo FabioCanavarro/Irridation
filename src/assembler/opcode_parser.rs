@@ -1,7 +1,7 @@
-use crate::instruction::Opcode;
-use nom::types::CompleteStr;
 use crate::assembler::Token;
+use crate::instruction::Opcode;
 use nom::alpha1;
+use nom::types::CompleteStr;
 
 named!(
     pub opcode_load<CompleteStr,Token>,
@@ -22,37 +22,34 @@ named!(pub opcode<CompleteStr, Token>,
 );
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
     fn test_parse_opcode_load() {
         let result = opcode_load(CompleteStr("load"));
         assert!(result.is_ok());
-        let (rest,token) = result.unwrap();
-        assert_eq!(token,Token::Op { code: Opcode::LOAD });
-        assert_eq!(rest,CompleteStr(""));
+        let (rest, token) = result.unwrap();
+        assert_eq!(token, Token::Op { code: Opcode::LOAD });
+        assert_eq!(rest, CompleteStr(""));
 
         let result = opcode_load(CompleteStr("aopload"));
         assert!(result.is_err());
     }
-    
+
     #[test]
     fn test_parse_opcode() {
         let result = opcode(CompleteStr("LOAD"));
         assert!(result.is_ok());
-        let (_,token) = result.unwrap();
-        assert_eq!(token,Token::Op { code: Opcode::LOAD });
+        let (_, token) = result.unwrap();
+        assert_eq!(token, Token::Op { code: Opcode::LOAD });
         let result = opcode(CompleteStr("aoad"));
         assert!(result.is_ok());
-        let (_,token) = result.unwrap();
-        assert_eq!(token,Token::Op { code: Opcode::IGL });
+        let (_, token) = result.unwrap();
+        assert_eq!(token, Token::Op { code: Opcode::IGL });
         let result = opcode(CompleteStr("add"));
         assert!(result.is_ok());
-        let (_,token) = result.unwrap();
-        assert_eq!(token,Token::Op { code: Opcode::ADD });
-        
-
+        let (_, token) = result.unwrap();
+        assert_eq!(token, Token::Op { code: Opcode::ADD });
     }
-
 }

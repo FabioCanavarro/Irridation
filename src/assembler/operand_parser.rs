@@ -1,7 +1,7 @@
-use nom::types::CompleteStr;
+use super::register_parser::register;
 use crate::assembler::Token;
 use nom::digit;
-use super::register_parser::register;
+use nom::types::CompleteStr;
 
 named!(
     pub interger_operand<CompleteStr,Token>,
@@ -26,7 +26,7 @@ named!(
 );
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
@@ -38,5 +38,4 @@ mod tests{
         let result = interger_operand(CompleteStr("#u"));
         assert!(result.is_err());
     }
-
 }

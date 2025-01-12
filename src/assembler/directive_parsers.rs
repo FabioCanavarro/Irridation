@@ -1,8 +1,8 @@
-use nom::types::CompleteStr;
-use nom::alpha1;
-use super::Token;
-use super::operand_parser::operand;
 use super::instruction_parser::AssemblerInstruction;
+use super::operand_parser::operand;
+use super::Token;
+use nom::alpha1;
+use nom::types::CompleteStr;
 
 named!(directive_declaration<CompleteStr,Token>,
     do_parse!(
@@ -44,4 +44,3 @@ named!(pub directive<CompleteStr,AssemblerInstruction>,
         )
     )
 );
-

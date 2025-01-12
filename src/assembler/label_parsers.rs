@@ -1,5 +1,5 @@
-use nom::{alphanumeric,multispace, types::CompleteStr};
 use super::Token;
+use nom::{alphanumeric, multispace, types::CompleteStr};
 
 // Looks for a user-defined label such as label1:
 named!(
@@ -15,7 +15,6 @@ named!(
         )
     )
 );
-
 
 // Look for its usage such as @label1
 named!(
@@ -33,15 +32,20 @@ named!(
 );
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
     fn test_label_declaration() {
         let result = label_declaration(CompleteStr("test:"));
         assert!(result.is_ok());
-        let (_,token) = result.unwrap();
-        assert_eq!(token,Token::LabelDeclaration { name: "test".to_string()});
+        let (_, token) = result.unwrap();
+        assert_eq!(
+            token,
+            Token::LabelDeclaration {
+                name: "test".to_string()
+            }
+        );
         let result = label_declaration(CompleteStr("test"));
         assert!(result.is_err());
     }
@@ -50,8 +54,13 @@ mod tests{
     fn test_label_usage() {
         let result = label_usage(CompleteStr("@test"));
         assert!(result.is_ok());
-        let (_,token) = result.unwrap();
-        assert_eq!(token,Token::LabelUsage { name: "test".to_string() });
+        let (_, token) = result.unwrap();
+        assert_eq!(
+            token,
+            Token::LabelUsage {
+                name: "test".to_string()
+            }
+        );
         let result = label_usage(CompleteStr("test"));
         assert!(result.is_err());
     }

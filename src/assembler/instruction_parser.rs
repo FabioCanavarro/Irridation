@@ -1,44 +1,49 @@
-use super::opcode_parser::*;
-use super::register_parser::*;
-use super::operand_parser::*;
 use super::directive_parsers::*;
 use super::label_parsers::*;
+use super::opcode_parser::*;
+use super::operand_parser::*;
+use super::register_parser::*;
 use super::SymbolTable;
 use super::Token;
-use nom::types::CompleteStr;
 use nom::multispace;
+use nom::types::CompleteStr;
 
-#[derive(PartialEq,Debug)]
-pub struct AssemblerInstruction{
+#[derive(PartialEq, Debug)]
+pub struct AssemblerInstruction {
     pub opcode: Option<Token>,
     pub label: Option<Token>,
-    pub directive: Option<Token>, 
+    pub directive: Option<Token>,
     pub operand1: Option<Token>,
     pub operand2: Option<Token>,
     pub operand3: Option<Token>,
 }
 
-impl AssemblerInstruction{
-    pub fn to_bytes(&self, symbol_table: &SymbolTable) -> Vec<u8>{
+impl AssemblerInstruction {
+    pub fn to_bytes(&self, symbol_table: &SymbolTable) -> Vec<u8> {
         let mut result = vec![];
-        match &self.opcode{
+        match &self.opcode {
             Some(Token::Op { code }) => {
-                let byte: u8 = u8::from(*code);  // Explicitly use From<Opcode> for u8
+                let byte: u8 = u8::from(*code); // Explicitly use From<Opcode> for u8
                 result.push(byte);
-            },
-            _ => {println!("Non opcode found in opcode field");std::process::exit(1)}
+            }
+            _ => {
+                println!("Non opcode found in opcode field");
+                std::process::exit(1)
+            }
         }
 
-        for i in [&self.operand1,&self.operand2,&self.operand3]{
+        for i in [&self.operand1, &self.operand2, &self.operand3] {
             // println!("Operand: {:?}",i);
-            if let Some(t) = i{AssemblerInstruction::extract_operand(t, &mut result)}
+            if let Some(t) = i {
+                AssemblerInstruction::extract_operand(t, &mut result)
+            }
         }
 
         // Incase the result is not an array witha  length of 4
-        while result.len() < 4{
+        while result.len() < 4 {
             result.push(0);
         }
-        
+
         // Debugging
         // println!("opcode {:?}",self.opcode);
         // result.iter().for_each(|x| println!("{}", x));
@@ -47,16 +52,16 @@ impl AssemblerInstruction{
         result
     }
 
-    fn extract_operand(t: &Token, result : &mut Vec<u8>){
-        match t{
-            Token::Register { reg } => {result.push(*reg)},
-            Token::IntergerOperand { val } =>{
+    fn extract_operand(t: &Token, result: &mut Vec<u8>) {
+        match t {
+            Token::Register { reg } => result.push(*reg),
+            Token::IntergerOperand { val } => {
                 let byte = *val as u16;
                 let byte1 = byte as u8;
                 let byte2 = (byte >> 8) as u8;
                 result.push(byte2);
                 result.push(byte1);
-            },
+            }
             _ => {
                 println!("Opcode is found in operand field");
                 std::process::exit(1);
@@ -64,27 +69,25 @@ impl AssemblerInstruction{
         }
     }
 
-    pub fn is_label(&self) -> bool{
+    pub fn is_label(&self) -> bool {
         self.label.is_some()
     }
 
-    pub fn is_opcode(&self) -> bool{
+    pub fn is_opcode(&self) -> bool {
         self.opcode.is_some()
     }
 
-    pub fn is_directive(&self) -> bool{
+    pub fn is_directive(&self) -> bool {
         self.directive.is_some()
     }
 
-    pub fn label_name(&self) -> Option<String>{
-        match &self.label{
-            Some(l) => {
-                match l{
-                    Token::LabelDeclaration { name } => Some(name.clone()),
-                    _ => None
-                }
+    pub fn label_name(&self) -> Option<String> {
+        match &self.label {
+            Some(l) => match l {
+                Token::LabelDeclaration { name } => Some(name.clone()),
+                _ => None,
             },
-            None => None
+            None => None,
         }
     }
 }
@@ -122,7 +125,6 @@ named!(instruction_two<CompleteStr,AssemblerInstruction>,
             }
     )
 ));
-
 
 named!(instruction_three<CompleteStr,AssemblerInstruction>,
     do_parse!(
@@ -170,7 +172,7 @@ named!(pub instruction_combined<CompleteStr,AssemblerInstruction>,
             instruction_one |
             instruction_two |
             instruction_four
-        ) >> 
+        ) >>
         (
             ins
         )
@@ -191,82 +193,64 @@ named!(pub instruction<CompleteStr, AssemblerInstruction>,
 );
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
     use crate::instruction::Opcode;
-    
+
     #[test]
     fn test_parse_instruction() {
-    let result = instruction_one(CompleteStr("load $0 #100"));
-    assert_eq!(result,Ok(
-        (
-            CompleteStr(""),
-            AssemblerInstruction{
-                label: None,
-                directive: None,
-                opcode: Some(Token::Op { code: Opcode::LOAD}),
-                operand1: Some(Token::Register { reg: 0 }),
-                operand2: Some(Token::IntergerOperand { val: 100 }),
-                operand3: None
-            }
+        let result = instruction_one(CompleteStr("load $0 #100"));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                AssemblerInstruction {
+                    label: None,
+                    directive: None,
+                    opcode: Some(Token::Op { code: Opcode::LOAD }),
+                    operand1: Some(Token::Register { reg: 0 }),
+                    operand2: Some(Token::IntergerOperand { val: 100 }),
+                    operand3: None
+                }
+            ))
         )
-    ))
     }
     #[test]
     fn test_single_instruction_to_bytes() {
         let (_, result) = instruction_one(CompleteStr("load $0 #100")).unwrap();
-        println!("Opcode: {:?}", result.opcode);  // Added debug print
-        
-        let code_value = match result.opcode {  // Store intermediate value
+        println!("Opcode: {:?}", result.opcode); // Added debug print
+
+        let code_value = match result.opcode {
+            // Store intermediate value
             Some(Token::Op { code }) => {
-                let value = u8::from(code);     // Explicit conversion using From trait
-                println!("Converted value: {}", value);  // Added debug print
+                let value = u8::from(code); // Explicit conversion using From trait
+                println!("Converted value: {}", value); // Added debug print
                 value
-            },
+            }
             _ => {
                 println!("Non opcode found in opcode field");
                 std::process::exit(1)
             }
         };
-        
-        assert_eq!(code_value, 0);  // Test against stored value
+
+        assert_eq!(code_value, 0); // Test against stored value
     }
 
     #[test]
     fn test_parse_instruction_no_operand() {
         let result = instruction_two(CompleteStr("hlt\n"));
         assert!(result.is_ok());
-        let (_,res) = result.unwrap();
-        assert_eq!(res,AssemblerInstruction{
-            opcode: Some(Token::Op{ code: Opcode::HLT}),
-            label: None,
-            directive: None,
-            operand1:None,
-            operand2:None,
-            operand3:None}
+        let (_, res) = result.unwrap();
+        assert_eq!(
+            res,
+            AssemblerInstruction {
+                opcode: Some(Token::Op { code: Opcode::HLT }),
+                label: None,
+                directive: None,
+                operand1: None,
+                operand2: None,
+                operand3: None
+            }
         );
-
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
