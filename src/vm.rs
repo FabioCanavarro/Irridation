@@ -1,4 +1,7 @@
-use crate::{assembler::{PIE_HEADER_LENGTH,PIE_HEADER_PREFIX}, instruction::Opcode};
+use crate::{
+    assembler::{PIE_HEADER_LENGTH, PIE_HEADER_PREFIX},
+    instruction::Opcode,
+};
 
 // Emulate cpu
 #[derive(Debug, PartialEq)]
@@ -185,7 +188,7 @@ impl Vm {
         self.program.append(&mut v)
     }
 
-    fn verify_header(&self) -> bool{
+    fn verify_header(&self) -> bool {
         if self.program[0..4] != PIE_HEADER_PREFIX {
             return false;
         }
@@ -193,22 +196,19 @@ impl Vm {
     }
 }
 
-pub fn prepend_header(mut b:Vec<u8>) -> Vec<u8>{
+pub fn prepend_header(mut b: Vec<u8>) -> Vec<u8> {
     let mut header = vec![];
-    for byte in PIE_HEADER_PREFIX{
+    for byte in PIE_HEADER_PREFIX {
         header.push(byte);
     }
 
-    while header.len() < PIE_HEADER_LENGTH{
+    while header.len() < PIE_HEADER_LENGTH {
         header.push(0);
     }
 
     header.append(&mut b);
     header
-
 }
-
-
 
 #[cfg(test)]
 mod tests {
