@@ -1,0 +1,11 @@
+name: iridium
+version: "0.0.1"
+author: Fabio Canavarro <fabiocanavarrotoh@gmail.com>
+about: Interpreter for iridation lang
+args:
+  - INPUT_FILE:
+      help: Path to the .iasm or .ir file to run
+      required: false
+      index: 1
+
+
