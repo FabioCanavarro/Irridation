@@ -10,8 +10,8 @@ pub mod program_parser;
 pub mod register_parser;
 
 // Constants
-const PIE_HEADER_PREFIX: [u8; 4] = [45, 50, 49, 45];
-const PIE_HEADER_LENGTH: usize = 64;
+pub const PIE_HEADER_PREFIX: [u8; 4] = [45, 50, 49, 45];
+pub const PIE_HEADER_LENGTH: usize = 64;
 
 
 #[derive(Debug, PartialEq)]

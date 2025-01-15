@@ -1,4 +1,4 @@
-use crate::instruction::Opcode;
+use crate::{assembler::{PIE_HEADER_LENGTH,PIE_HEADER_PREFIX}, instruction::Opcode};
 
 // Emulate cpu
 #[derive(Debug, PartialEq)]
@@ -19,7 +19,7 @@ impl Vm {
     pub fn new() -> Vm {
         Vm {
             registers: [0; 32],
-            pc: 0,
+            pc: 64,
             heap: vec![],
             program: vec![],
             remainder: 0,
@@ -184,7 +184,31 @@ impl Vm {
     pub fn add_bytes(&mut self, mut v: Vec<u8>) {
         self.program.append(&mut v)
     }
+
+    fn verify_header(&self) -> bool{
+        if self.program[0..4] != PIE_HEADER_PREFIX {
+            return false;
+        }
+        true
+    }
 }
+
+pub fn prepend_header(mut b:Vec<u8>) -> Vec<u8>{
+    let mut header = vec![];
+    for byte in PIE_HEADER_PREFIX{
+        header.push(byte);
+    }
+
+    while header.len() < PIE_HEADER_LENGTH{
+        header.push(0);
+    }
+
+    header.append(&mut b);
+    header
+
+}
+
+
 
 #[cfg(test)]
 mod tests {
@@ -200,24 +224,27 @@ mod tests {
     fn test_opcode_hlt() {
         let mut vm = Vm::new();
         vm.program = vec![0, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run();
         println!("{}", vm.pc);
-        assert_eq!(vm.pc, 4);
+        assert_eq!(vm.pc, 68);
     }
 
     #[test]
     fn test_opcode_igl() {
         let mut vm = Vm::new();
         vm.program = vec![20, 1, 1, 1];
+        vm.program = prepend_header(vm.program);
         vm.run();
         println!("{}", vm.pc);
-        assert_eq!(vm.pc, 1);
+        assert_eq!(vm.pc, 65);
     }
 
     #[test]
     fn test_load_opcode() {
         let mut vm = Vm::new();
         vm.program = vec![0, 0, 1, 244];
+        vm.program = prepend_header(vm.program);
         vm.run();
         assert_eq!(vm.registers[0], 500);
     }
@@ -232,6 +259,7 @@ mod tests {
         // Add register 0 and register 1, store result in register 2
         vm.add_bytes(vec![1, 0, 1, 2]);
 
+        vm.program = prepend_header(vm.program);
         vm.run();
 
         vm.registers.iter().for_each(|x| println!("{}", x));
@@ -243,6 +271,7 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 1;
         vm.program = vec![5, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
         assert_eq!(vm.pc, 1);
     }
@@ -251,8 +280,9 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 1;
         vm.program = vec![7, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
-        assert_eq!(vm.pc, 1);
+        assert_eq!(vm.pc, 65);
     }
 
     #[test]
@@ -260,8 +290,9 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 1;
         vm.program = vec![6, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run();
-        assert_eq!(vm.pc, 3);
+        assert_eq!(vm.pc, 67);
     }
 
     #[test]
@@ -270,10 +301,11 @@ mod tests {
         vm.registers[0] = 1;
         vm.registers[1] = 1;
         vm.program = vec![8, 0, 1, 2];
+        vm.program = prepend_header(vm.program);
         vm.run();
         assert!(vm.equal_flag);
         vm.registers[0] = 32;
-        vm.pc = 0;
+        vm.pc = 64;
         vm.run();
         assert!(!vm.equal_flag);
     }
@@ -285,6 +317,7 @@ mod tests {
         vm.registers[1] = 1;
         vm.equal_flag = true;
         vm.program = vec![14, 0, 0, 0, 15, 1, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
         assert_eq!(vm.pc, 7);
         vm.pc = 0;
@@ -297,8 +330,9 @@ mod tests {
     fn test_nop_opcode() {
         let mut vm = Vm::new();
         vm.program = vec![16, 0, 0, 0, 1, 0, 0, 1];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
-        assert_eq!(vm.pc, 4);
+        assert_eq!(vm.pc, 68);
     }
 
     #[test]
@@ -306,6 +340,7 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 100;
         vm.program = vec![17, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
 
         assert_eq!(vm.heap.len(), 100);
@@ -316,6 +351,7 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 2;
         vm.program = vec![18, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
 
         assert_eq!(vm.registers[0], 3);
@@ -326,6 +362,7 @@ mod tests {
         let mut vm = Vm::new();
         vm.registers[0] = 2;
         vm.program = vec![19, 0, 0, 0];
+        vm.program = prepend_header(vm.program);
         vm.run_once();
 
         assert_eq!(vm.registers[0], 1);
