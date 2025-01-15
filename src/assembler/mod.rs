@@ -9,6 +9,11 @@ pub mod operand_parser;
 pub mod program_parser;
 pub mod register_parser;
 
+// Constants
+const PIE_HEADER_PREFIX: [u8; 4] = [45, 50, 49, 45];
+const PIE_HEADER_LENGTH: usize = 64;
+
+
 #[derive(Debug, PartialEq)]
 pub enum Token {
     Op { code: Opcode },
@@ -136,11 +141,26 @@ impl Assembler {
     pub fn assemble(&mut self, raw: &str) -> Option<Vec<u8>> {
         match program(CompleteStr(raw)) {
             Ok((_, p)) => {
+                let mut result = self.write_pie_header();
+
                 self.process_first_phase(&p);
-                Some(self.process_second_phase(&p))
+                result.append(&mut self.process_second_phase(&p));
+                Some(result)
             }
             Err(_) => None,
         }
+    }
+
+    fn write_pie_header(&self) -> Vec<u8>{
+        let mut header = vec![];
+        for byte in PIE_HEADER_PREFIX{
+            header.push(byte);
+        }
+
+        while header.len() < PIE_HEADER_LENGTH{
+            header.push(0);
+        }
+        header
     }
 }
 
@@ -174,6 +194,6 @@ mod tests {
         let mut vm: Vm = Vm::new();
         vm.add_bytes(result.unwrap());
         // jmpe @test still doesnt increase byte lenght
-        assert_eq!(vm.program.len(), 16);
+        assert_eq!(vm.program.len(), 80);
     }
 }
