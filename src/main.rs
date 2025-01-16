@@ -4,7 +4,7 @@ extern crate nom;
 #[macro_use]
 extern crate clap;
 
-use assembler::Assembler;
+use assembler::base_assembler::Assembler;
 use clap::{App, Arg, SubCommand};
 use std::{fs::File, io::Read, path::Path};
 use vm::Vm;
