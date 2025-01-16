@@ -1,6 +1,7 @@
 use crate::instruction::Opcode;
 use nom::types::CompleteStr;
 use program_parser::{program, Program};
+pub mod base_assembler;
 pub mod directive_parsers;
 pub mod instruction_parser;
 pub mod label_parsers;
@@ -8,7 +9,6 @@ pub mod opcode_parser;
 pub mod operand_parser;
 pub mod program_parser;
 pub mod register_parser;
-pub mod base_assembler;
 
 // Constants
 pub const PIE_HEADER_PREFIX: [u8; 4] = [45, 50, 49, 45];
@@ -80,13 +80,11 @@ impl SymbolTable {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
+    use super::base_assembler::*;
     use super::*;
     use crate::vm::Vm;
-    use super::base_assembler::*;
 
     #[test]
     fn test_create_symbol_table() {

@@ -71,13 +71,13 @@ impl Assembler {
         }
     }
 
-    fn write_pie_header(&self) -> Vec<u8>{
+    fn write_pie_header(&self) -> Vec<u8> {
         let mut header = vec![];
-        for byte in PIE_HEADER_PREFIX{
+        for byte in PIE_HEADER_PREFIX {
             header.push(byte);
         }
 
-        while header.len() < PIE_HEADER_LENGTH{
+        while header.len() < PIE_HEADER_LENGTH {
             header.push(0);
         }
         header
