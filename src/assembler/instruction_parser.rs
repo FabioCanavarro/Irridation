@@ -160,7 +160,7 @@ named!(instruction_four<CompleteStr,AssemblerInstruction>,
                 operand1: o1,
                 operand2: o2,
                 operand3: o3
-                
+
             }
         )
     )

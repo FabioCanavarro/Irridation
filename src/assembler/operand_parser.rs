@@ -39,8 +39,6 @@ named!(
     )
 );
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,9 +57,14 @@ mod tests {
     fn test_parse_string_operand() {
         let result = operand(CompleteStr("'This is Just me testing things lol'"));
         assert!(result.is_ok());
-        assert_eq!(result,Ok((
-            CompleteStr(""),
-            Token::IrString { name: "This is Just me testing things lol".to_string() }
-        )));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                Token::IrString {
+                    name: "This is Just me testing things lol".to_string()
+                }
+            ))
+        );
     }
 }

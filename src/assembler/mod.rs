@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::instruction::Opcode;
 use nom::types::CompleteStr;
 use program_parser::{program, Program};
@@ -23,7 +24,7 @@ pub enum Token {
     LabelDeclaration { name: String },
     LabelUsage { name: String },
     Directive { name: String },
-    IrString {name: String}
+    IrString { name: String },
 }
 
 // Symbol
