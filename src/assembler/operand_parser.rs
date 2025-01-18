@@ -1,3 +1,4 @@
+use super::label_parsers::label_usage;
 use super::register_parser::register;
 use crate::assembler::Token;
 use nom::digit;
@@ -16,14 +17,28 @@ named!(
         )
     )
 );
-
+named!(
+    pub irstring<CompleteStr,Token>,
+    do_parse!(
+        tag!("'") >>
+        content: take_until!("'") >>
+        tag!("'") >>
+        (
+            Token::IrString { name: content.to_string() }
+        )
+    )
+);
 named!(
     pub operand<CompleteStr,Token>,
     alt!(
         interger_operand|
-        register
+        label_usage|
+        register|
+        irstring
     )
 );
+
+
 
 #[cfg(test)]
 mod tests {
@@ -37,5 +52,15 @@ mod tests {
         assert!(result.is_err());
         let result = interger_operand(CompleteStr("#u"));
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_string_operand() {
+        let result = operand(CompleteStr("'Hello'"));
+        assert!(result.is_ok());
+        assert_eq!(result,Ok((
+            CompleteStr(""),
+            Token::IrString { name: "Hello".to_string() }
+        )));
     }
 }

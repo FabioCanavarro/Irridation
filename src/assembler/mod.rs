@@ -23,6 +23,7 @@ pub enum Token {
     LabelDeclaration { name: String },
     LabelUsage { name: String },
     Directive { name: String },
+    IrString {name: String}
 }
 
 // Symbol
