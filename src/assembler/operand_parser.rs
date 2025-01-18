@@ -28,6 +28,7 @@ named!(
         )
     )
 );
+
 named!(
     pub operand<CompleteStr,Token>,
     alt!(
@@ -56,11 +57,11 @@ mod tests {
 
     #[test]
     fn test_parse_string_operand() {
-        let result = operand(CompleteStr("'Hello'"));
+        let result = operand(CompleteStr("'This is Just me testing things lol'"));
         assert!(result.is_ok());
         assert_eq!(result,Ok((
             CompleteStr(""),
-            Token::IrString { name: "Hello".to_string() }
+            Token::IrString { name: "This is Just me testing things lol".to_string() }
         )));
     }
 }
