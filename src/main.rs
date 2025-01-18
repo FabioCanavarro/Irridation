@@ -51,7 +51,7 @@ fn main() {
             let mut asm = Assembler::new();
             let program = asm.assemble(&program);
 
-            if let Some(p) = program {
+            if let Ok(p) = program {
                 vm.add_bytes(p);
                 vm.run();
                 std::process::exit(0);
