@@ -10,7 +10,6 @@ pub enum AssemblerPhase {
     Second,
 }
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum AssemblerSection {
     Data { starting_instruction: Option<u32> },
@@ -18,13 +17,12 @@ pub enum AssemblerSection {
     Unknown,
 }
 
-
-#[derive(Debug,Clone)]
-pub enum AssemblerError{
+#[derive(Debug, Clone)]
+pub enum AssemblerError {
     InsufficientSections,
-    ParseError{errors: String},
-    StringConstantDeclaredWithoutLabel{instruction: u32},
-    SymbolAlreadyDeclared
+    ParseError { errors: String },
+    StringConstantDeclaredWithoutLabel { instruction: u32 },
+    SymbolAlreadyDeclared,
 }
 
 // Assembler
@@ -45,9 +43,9 @@ pub struct Assembler {
     current_section: Option<AssemblerSection>,
 
     current_instruction: u32,
-    
+
     // Collect all errors to present to the user in the end.
-    errors: Vec<AssemblerError>
+    errors: Vec<AssemblerError>,
 }
 
 impl Default for Assembler {
@@ -63,10 +61,17 @@ impl Assembler {
             ro: vec![],
             bytecode: vec![],
             ro_offset: 0,
-            sections: vec![AssemblerSection::Data { starting_instruction: Some(0) },AssemblerSection::Code { starting_instruction: Some(0) }],
+            sections: vec![
+                AssemblerSection::Data {
+                    starting_instruction: Some(0),
+                },
+                AssemblerSection::Code {
+                    starting_instruction: Some(0),
+                },
+            ],
             current_section: None,
             current_instruction: 0,
-            errors: vec![]
+            errors: vec![],
         }
     }
 
@@ -100,21 +105,25 @@ impl Assembler {
         }
     }
 
-    fn process_label_declaration(&mut self,i: &AssemblerInstruction){
-        let name = match i.label_name(){
+    fn process_label_declaration(&mut self, i: &AssemblerInstruction) {
+        let name = match i.label_name() {
             Some(name) => name,
             None => {
-                self.errors.push(AssemblerError::StringConstantDeclaredWithoutLabel{instruction: self.current_instruction});
+                self.errors
+                    .push(AssemblerError::StringConstantDeclaredWithoutLabel {
+                        instruction: self.current_instruction,
+                    });
                 return;
             }
         };
 
-        if self.symbol_table.has_symbol(&name){
-        self.errors.push(AssemblerError::SymbolAlreadyDeclared);
-        return;
+        if self.symbol_table.has_symbol(&name) {
+            self.errors.push(AssemblerError::SymbolAlreadyDeclared);
+            return;
         }
 
-        self.symbol_table.add_symbols(Symbol::new(name, SymbolType::Label))
+        self.symbol_table
+            .add_symbols(Symbol::new(name, SymbolType::Label))
     }
 
     pub fn process_first_phase(&mut self, p: &Program) {
@@ -134,15 +143,15 @@ impl Assembler {
     }
 
     fn write_pie_header(&self) -> Vec<u8> {
-            let mut header = vec![];
-            for byte in PIE_HEADER_PREFIX {
-                header.push(byte);
-            }
+        let mut header = vec![];
+        for byte in PIE_HEADER_PREFIX {
+            header.push(byte);
+        }
 
-            while header.len() < PIE_HEADER_LENGTH {
-                header.push(0);
-            }
-            header
+        while header.len() < PIE_HEADER_LENGTH {
+            header.push(0);
+        }
+        header
     }
 
     pub fn assemble(&mut self, raw: &str) -> Result<Vec<u8>, Vec<AssemblerError>> {
@@ -152,11 +161,11 @@ impl Assembler {
 
                 self.process_first_phase(&p);
 
-                if !self.errors.is_empty(){
+                if !self.errors.is_empty() {
                     return Err(self.errors.clone());
                 }
-                if self.sections.len() != 2{
-                    print!("found {} sections, needed 2",self.sections.len());
+                if self.sections.len() != 2 {
+                    print!("found {} sections, needed 2", self.sections.len());
                     self.errors.push(AssemblerError::InsufficientSections);
                     return Err(self.errors.clone());
                 }
@@ -165,11 +174,11 @@ impl Assembler {
                 Ok(result)
             }
             Err(e) => {
-                println!("There wan error parsing the code: {:?}",e);
-                Err(vec![AssemblerError::ParseError{errors: e.to_string()}])
-            },
+                println!("There wan error parsing the code: {:?}", e);
+                Err(vec![AssemblerError::ParseError {
+                    errors: e.to_string(),
+                }])
+            }
         }
     }
-
-    
 }

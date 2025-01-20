@@ -89,7 +89,6 @@ impl SymbolTable {
         }
         false
     }
- 
 }
 
 #[cfg(test)]
@@ -116,7 +115,8 @@ mod tests {
 
     #[test]
     fn test_assemble_program() {
-        let program: &str = ".data\n.code\nload $2 #10\n load $1 #20\n add $1 $2 $3\ntest: inc $1\n jmpe @test\n";
+        let program: &str =
+            ".data\n.code\nload $2 #10\n load $1 #20\n add $1 $2 $3\ntest: inc $1\n jmpe @test\n";
         let mut assembler: Assembler = Assembler::new();
         let result = assembler.assemble(program);
         assert!(result.is_ok());
