@@ -32,15 +32,15 @@ pub enum Token {
 pub struct Symbol {
     name: String,
     symbol_type: SymbolType,
-    offset: u32,
+    offset: Option<u32>,
 }
 
 impl Symbol {
-    pub fn new(name: String, symbol_type: SymbolType, offset: u32) -> Symbol {
+    pub fn new(name: String, symbol_type: SymbolType) -> Symbol {
         Symbol {
             name,
             symbol_type,
-            offset,
+            offset: None,
         }
     }
 }
@@ -75,11 +75,21 @@ impl SymbolTable {
     pub fn symbol_value(&self, symbol: &str) -> Option<u32> {
         for i in &self.symbols {
             if i.name == symbol {
-                return Some(i.offset);
+                return Some(i.offset.unwrap());
             }
         }
         None
     }
+
+    pub fn has_symbol(&self, symbol: &str) -> bool {
+        for i in &self.symbols {
+            if i.name == symbol {
+                return true;
+            }
+        }
+        false
+    }
+ 
 }
 
 #[cfg(test)]
@@ -94,7 +104,7 @@ mod tests {
         table.add_symbols(Symbol {
             name: "test".to_string(),
             symbol_type: SymbolType::Label,
-            offset: 13,
+            offset: Some(13),
         });
         assert_eq!(table.symbols.len(), 1);
         let symbol_val = table.symbol_value("test");
