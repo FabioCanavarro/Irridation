@@ -90,6 +90,22 @@ impl AssemblerInstruction {
             None => None,
         }
     }
+
+    pub fn get_directive_name(&self) -> Option<String>{
+        match &self.directive {
+            Some(d) => {
+                    match d{
+                        Token::Directive { name } => return Some(name.to_string()),
+                        _ => None
+                    }
+            },
+            None => None
+        }
+    }
+
+    pub fn has_operand(&self) -> bool{
+        self.operand1.is_some() | self.operand2.is_some() | self.operand3.is_some()
+    }
 }
 
 named!(instruction_one<CompleteStr,AssemblerInstruction>,

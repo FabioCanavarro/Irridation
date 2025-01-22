@@ -17,13 +17,35 @@ pub enum AssemblerSection {
     Unknown,
 }
 
+impl Default for AssemblerSection {
+    fn default() -> Self {
+        AssemblerSection::Unknown
+    }
+}
+
+impl<'a> From<&'a str> for AssemblerSection {
+    fn from(name: &str) -> AssemblerSection {
+        match name {
+            "data" => AssemblerSection::Data { starting_instruction: None },
+            "code" => AssemblerSection::Code { starting_instruction: None },
+            _ => AssemblerSection::Unknown,
+        }
+    }
+}
+
+
+
 #[derive(Debug, Clone)]
 pub enum AssemblerError {
-    InsufficientSections,
-    ParseError { errors: String },
+    NoSegmentDeclarationFound { instruction: u32 },
     StringConstantDeclaredWithoutLabel { instruction: u32 },
     SymbolAlreadyDeclared,
+    UnknownDirectiveFound { directive: String },
+    NonOpcodeInOpcodeField,
+    InsufficientSections,
+    ParseError { error: String },
 }
+
 
 // Assembler
 #[derive(Debug)]
@@ -133,13 +155,40 @@ impl Assembler {
     }
 
     pub fn process_second_phase(&mut self, p: &Program) -> Vec<u8> {
+
+        self.current_instruction = 0;
         // Second pass
         let mut program = vec![];
         for i in &p.instructions {
-            let mut bytes = i.to_bytes(&self.symbol_table);
-            program.append(&mut bytes);
-        }
+            if i.is_opcode(){
+                let mut bytes = i.to_bytes(&self.symbol_table);
+                program.append(&mut bytes);
+ 
+            }
+       }
         program
+    }
+    fn process_directive(&mut self,i: &AssemblerInstruction){
+        let directive_name = match i.get_directive_name(){
+            Some(name) => name,
+            None => {
+                println!("Directive has an invalid name: {:?}", i);
+                return; 
+            }
+        };
+
+        if i.has_operand(){
+            match directive_name.as_ref(){
+                "asciiz" => {todo!()},
+                _ => {
+                    self.errors.push(AssemblerError::UnknownDirectiveFound{ directive: directive_name.clone() });
+                }
+            }
+        }
+        else {
+            todo!()
+        }
+        
     }
 
     fn write_pie_header(&self) -> Vec<u8> {
@@ -176,7 +225,7 @@ impl Assembler {
             Err(e) => {
                 println!("There wan error parsing the code: {:?}", e);
                 Err(vec![AssemblerError::ParseError {
-                    errors: e.to_string(),
+                    error: e.to_string(),
                 }])
             }
         }
