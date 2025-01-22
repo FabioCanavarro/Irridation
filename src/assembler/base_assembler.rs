@@ -26,14 +26,16 @@ impl Default for AssemblerSection {
 impl<'a> From<&'a str> for AssemblerSection {
     fn from(name: &str) -> AssemblerSection {
         match name {
-            "data" => AssemblerSection::Data { starting_instruction: None },
-            "code" => AssemblerSection::Code { starting_instruction: None },
+            "data" => AssemblerSection::Data {
+                starting_instruction: None,
+            },
+            "code" => AssemblerSection::Code {
+                starting_instruction: None,
+            },
             _ => AssemblerSection::Unknown,
         }
     }
 }
-
-
 
 #[derive(Debug, Clone)]
 pub enum AssemblerError {
@@ -45,7 +47,6 @@ pub enum AssemblerError {
     InsufficientSections,
     ParseError { error: String },
 }
-
 
 // Assembler
 #[derive(Debug)]
@@ -155,40 +156,40 @@ impl Assembler {
     }
 
     pub fn process_second_phase(&mut self, p: &Program) -> Vec<u8> {
-
         self.current_instruction = 0;
         // Second pass
         let mut program = vec![];
         for i in &p.instructions {
-            if i.is_opcode(){
+            if i.is_opcode() {
                 let mut bytes = i.to_bytes(&self.symbol_table);
                 program.append(&mut bytes);
- 
             }
-       }
+        }
         program
     }
-    fn process_directive(&mut self,i: &AssemblerInstruction){
-        let directive_name = match i.get_directive_name(){
+    fn process_directive(&mut self, i: &AssemblerInstruction) {
+        let directive_name = match i.get_directive_name() {
             Some(name) => name,
             None => {
                 println!("Directive has an invalid name: {:?}", i);
-                return; 
+                return;
             }
         };
 
-        if i.has_operand(){
-            match directive_name.as_ref(){
-                "asciiz" => {todo!()},
+        if i.has_operand() {
+            match directive_name.as_ref() {
+                "asciiz" => {
+                    todo!()
+                }
                 _ => {
-                    self.errors.push(AssemblerError::UnknownDirectiveFound{ directive: directive_name.clone() });
+                    self.errors.push(AssemblerError::UnknownDirectiveFound {
+                        directive: directive_name.clone(),
+                    });
                 }
             }
-        }
-        else {
+        } else {
             todo!()
         }
-        
     }
 
     fn write_pie_header(&self) -> Vec<u8> {
