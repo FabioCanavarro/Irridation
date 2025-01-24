@@ -17,12 +17,6 @@ pub enum AssemblerSection {
     Unknown,
 }
 
-impl Default for AssemblerSection {
-    fn default() -> Self {
-        AssemblerSection::Unknown
-    }
-}
-
 impl<'a> From<&'a str> for AssemblerSection {
     fn from(name: &str) -> AssemblerSection {
         match name {
@@ -114,20 +108,6 @@ impl Assembler {
         }
     }
 
-    pub fn extract_all(&mut self, p: &Program) {
-        for i in &p.instructions {
-            if i.is_label() {
-                if let Some(name) = i.label_name() {
-                    self.symbol_table.symbols.push(Symbol {
-                        name,
-                        symbol_type: SymbolType::Label,
-                        offset: Some(0),
-                    })
-                }
-            }
-        }
-    }
-
     fn process_label_declaration(&mut self, i: &AssemblerInstruction) {
         let name = match i.label_name() {
             Some(name) => name,
@@ -149,11 +129,31 @@ impl Assembler {
             .add_symbols(Symbol::new(name, SymbolType::Label))
     }
 
+
+
     pub fn process_first_phase(&mut self, p: &Program) {
         // First pass
-        self.extract_label(p);
+        for i in &p.instructions {
+            if i.is_label() {
+
+                if self.current_section.is_some(){
+                    self.process_label_declaration(i);
+                }
+                else {
+                    // If we have *not* hit a segment header yet, then we have a label outside of a segment, which is not allowed
+                    self.errors.push(AssemblerError::NoSegmentDeclarationFound{instruction: self.current_instruction});
+                }
+            }
+            if i.is_directive(){
+                self.process_directive(i);
+            }
+
+            self.current_instruction+=1;
+        }
         self.phase = AssemblerPhase::Second;
     }
+
+
 
     pub fn process_second_phase(&mut self, p: &Program) -> Vec<u8> {
         self.current_instruction = 0;
@@ -164,6 +164,10 @@ impl Assembler {
                 let mut bytes = i.to_bytes(&self.symbol_table);
                 program.append(&mut bytes);
             }
+            if i.is_directive(){
+                self.process_directive(i);
+            }
+            self.current_instruction+=1
         }
         program
     }
@@ -175,10 +179,10 @@ impl Assembler {
                 return;
             }
         };
-
         if i.has_operand() {
             match directive_name.as_ref() {
                 "asciiz" => {
+                    // handle_asciiz func
                     todo!()
                 }
                 _ => {
@@ -188,8 +192,23 @@ impl Assembler {
                 }
             }
         } else {
-            todo!()
+            self.process_section_header(&directive_name);
         }
+    }
+
+    fn process_section_header(&mut self, header_name: &str){
+        let new_section: AssemblerSection = header_name.into();
+
+        if new_section == AssemblerSection::Unknown {
+            println!("Found an section header that is unknown: {:#?}", header_name);
+            return;
+        }
+        self.sections.push(new_section.clone());
+        self.current_section = Some(new_section);
+    }
+
+    fn handle_asciiz(&mut self, i: &AssemblerInstruction){
+        todo!();
     }
 
     fn write_pie_header(&self) -> Vec<u8> {
@@ -224,10 +243,8 @@ impl Assembler {
                 Ok(result)
             }
             Err(e) => {
-                println!("There wan error parsing the code: {:?}", e);
-                Err(vec![AssemblerError::ParseError {
-                    error: e.to_string(),
-                }])
+                println!("There was an error parsing the code: {:?}", e);
+                Err(vec![AssemblerError::ParseError{ error: e.to_string() }])
             }
         }
     }
