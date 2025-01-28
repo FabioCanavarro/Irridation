@@ -199,11 +199,13 @@ impl Assembler {
     }
 
     fn handle_asciiz(&mut self, i: &AssemblerInstruction) {
-        if self.phase != AssemblerPhase::First{return;}
+        if self.phase != AssemblerPhase::First {
+            return;
+        }
 
-        match i.get_string_constant(){
+        match i.get_string_constant() {
             Some(string) => {
-                match i.get_label_name(){
+                match i.get_label_name() {
                     Some(name) => self.symbol_table.set_symbol_offset(&name, self.ro_offset),
                     None => {
                         println!("Found a String constant with no associated label was found");
@@ -211,18 +213,17 @@ impl Assembler {
                     }
                 };
 
-                for byte in string.as_bytes(){
+                for byte in string.as_bytes() {
                     self.ro.push(*byte);
-                    self.ro_offset+=1
+                    self.ro_offset += 1
                 }
                 self.ro.push(0);
-                self.ro_offset+=1;
-            },
+                self.ro_offset += 1;
+            }
             _ => {
                 println!("No String Constant founded");
             }
         }
-            
     }
 
     fn write_pie_header(&self) -> Vec<u8> {

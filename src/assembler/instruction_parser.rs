@@ -81,10 +81,10 @@ impl AssemblerInstruction {
         self.directive.is_some()
     }
 
-    pub fn get_string_constant(&self) -> Option<String>{
-        match &self.operand1{
+    pub fn get_string_constant(&self) -> Option<String> {
+        match &self.operand1 {
             Some(Token::IrString { name }) => Some(name.to_string()),
-            _ => None
+            _ => None,
         }
     }
 

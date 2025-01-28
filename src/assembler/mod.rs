@@ -43,7 +43,7 @@ impl Symbol {
             offset: None,
         }
     }
-    
+
     pub fn new_with_offset(name: String, symbol_type: SymbolType, offset: Option<u32>) -> Symbol {
         Symbol {
             name,
@@ -89,7 +89,6 @@ impl SymbolTable {
         None
     }
 
-
     pub fn set_symbol_offset(&mut self, s: &str, offset: u32) -> bool {
         for symbol in &mut self.symbols {
             if symbol.name == s {
@@ -99,7 +98,6 @@ impl SymbolTable {
         }
         false
     }
-
 
     pub fn has_symbol(&self, symbol: &str) -> bool {
         for i in &self.symbols {
