@@ -55,7 +55,7 @@ pub struct Assembler {
 
     ro_offset: u32,
 
-    sections: Vec<AssemblerSection>,
+    pub sections: Vec<AssemblerSection>,
 
     current_section: Option<AssemblerSection>,
 
@@ -78,14 +78,7 @@ impl Assembler {
             ro: vec![],
             bytecode: vec![],
             ro_offset: 0,
-            sections: vec![
-                AssemblerSection::Data {
-                    starting_instruction: Some(0),
-                },
-                AssemblerSection::Code {
-                    starting_instruction: Some(0),
-                },
-            ],
+            sections: vec![],
             current_section: None,
             current_instruction: 0,
             errors: vec![],
@@ -96,7 +89,7 @@ impl Assembler {
         let mut c = 0;
         for i in &p.instructions {
             if i.is_label() {
-                if let Some(name) = i.label_name() {
+                if let Some(name) = i.get_label_name() {
                     self.symbol_table.symbols.push(Symbol {
                         name,
                         symbol_type: SymbolType::Label,
@@ -109,7 +102,7 @@ impl Assembler {
     }
 
     fn process_label_declaration(&mut self, i: &AssemblerInstruction) {
-        let name = match i.label_name() {
+        let name = match i.get_label_name() {
             Some(name) => name,
             None => {
                 self.errors
@@ -207,7 +200,30 @@ impl Assembler {
     }
 
     fn handle_asciiz(&mut self, i: &AssemblerInstruction) {
-        todo!();
+        if self.phase != AssemblerPhase::First{return;}
+
+        match i.get_string_constant(){
+            Some(string) => {
+                match i.get_label_name(){
+                    Some(name) => self.symbol_table.set_symbol_offset(&name, self.ro_offset),
+                    None => {
+                        println!("Found a String constant with no associated label was found");
+                        return;
+                    }
+                };
+
+                for byte in string.as_bytes(){
+                    self.ro.push(*byte);
+                    self.ro_offset+=1
+                }
+                self.ro.push(0);
+                self.ro_offset+=1;
+            },
+            _ => {
+                println!("No String Constant founded");
+            }
+        }
+            
     }
 
     fn write_pie_header(&self) -> Vec<u8> {

@@ -43,6 +43,14 @@ impl Symbol {
             offset: None,
         }
     }
+    
+    pub fn new_with_offset(name: String, symbol_type: SymbolType, offset: Option<u32>) -> Symbol {
+        Symbol {
+            name,
+            symbol_type,
+            offset,
+        }
+    }
 }
 
 // SymbolType
@@ -80,6 +88,18 @@ impl SymbolTable {
         }
         None
     }
+
+
+    pub fn set_symbol_offset(&mut self, s: &str, offset: u32) -> bool {
+        for symbol in &mut self.symbols {
+            if symbol.name == s {
+                symbol.offset = Some(offset);
+                return true;
+            }
+        }
+        false
+    }
+
 
     pub fn has_symbol(&self, symbol: &str) -> bool {
         for i in &self.symbols {
@@ -119,7 +139,6 @@ mod tests {
             ".data\n.code\nload $2 #10\n load $1 #20\n add $1 $2 $3\ntest: inc $1\n jmpe @test\n";
         let mut assembler: Assembler = Assembler::new();
         let result = assembler.assemble(program);
-        assert!(result.is_ok());
         let mut vm: Vm = Vm::new();
         vm.add_bytes(result.unwrap());
         // jmpe @test still doesnt increase byte lenght
