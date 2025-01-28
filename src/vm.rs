@@ -12,6 +12,7 @@ pub struct Vm {
     pub program: Vec<u8>,
     remainder: u32,
     equal_flag: bool,
+    ro_data: Vec<u8>,
 }
 impl Default for Vm {
     fn default() -> Self {
@@ -27,6 +28,7 @@ impl Vm {
             program: vec![],
             remainder: 0,
             equal_flag: false,
+            ro_data: vec![],
         }
     }
 
@@ -140,6 +142,25 @@ impl Vm {
                 self.next_8_bits();
                 self.next_8_bits();
             }
+            Opcode::PTRS => {
+                let start = self.next_16_bits() as usize;
+                let mut end = start;
+                let slice = self.ro_data.as_slice();
+
+                while slice[end] != 0 {
+                    end += 1
+                }
+
+                let result = std::str::from_utf8(&slice[start..end]);
+                match result {
+                    Ok(s) => {
+                        print!("{}", s);
+                    }
+                    Err(e) => {
+                        println!("Error decoding string for prts instruction: {:#?}", e)
+                    }
+                };
+            }
             _ => {
                 println!("This is not an opcode");
                 return true;
@@ -233,7 +254,7 @@ mod tests {
     #[test]
     fn test_opcode_igl() {
         let mut vm = Vm::new();
-        vm.program = vec![20, 1, 1, 1];
+        vm.program = vec![253, 1, 1, 1];
         vm.program = prepend_header(vm.program);
         vm.run();
         println!("{}", vm.pc);

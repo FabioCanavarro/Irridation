@@ -24,6 +24,7 @@ pub enum Opcode {
     AlOC,
     INC,
     DEC,
+    PTRS,
 }
 
 #[derive(Debug, PartialEq)]
@@ -60,6 +61,7 @@ impl From<u8> for Opcode {
             17 => Opcode::AlOC,
             18 => Opcode::INC,
             19 => Opcode::DEC,
+            20 => Opcode::PTRS,
             254 => Opcode::HLT,
             _ => Opcode::IGL,
         }
@@ -89,6 +91,7 @@ impl From<Opcode> for u8 {
             Opcode::AlOC => 17,
             Opcode::INC => 18,
             Opcode::DEC => 19,
+            Opcode::PTRS => 20,
             Opcode::IGL => 255, // For illegal instructions, we could use a sentinel value like 255
             Opcode::HLT => 254,
         }
@@ -121,6 +124,7 @@ impl<'a> From<CompleteStr<'a>> for Opcode {
             CompleteStr("aloc") => Opcode::AlOC,
             CompleteStr("inc") => Opcode::INC,
             CompleteStr("dec") => Opcode::DEC,
+            CompleteStr("prts") => Opcode::PTRS,
             _ => Opcode::IGL,
         }
     }
