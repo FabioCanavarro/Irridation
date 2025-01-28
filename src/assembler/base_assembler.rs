@@ -171,8 +171,7 @@ impl Assembler {
         if i.has_operand() {
             match directive_name.as_ref() {
                 "asciiz" => {
-                    // handle_asciiz func
-                    todo!()
+                    self.handle_asciiz(i);
                 }
                 _ => {
                     self.errors.push(AssemblerError::UnknownDirectiveFound {
