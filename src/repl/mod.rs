@@ -84,10 +84,16 @@ impl Repl {
                     stdin.read_line(&mut tmp).expect("Unable to read the line");
                     let tmp = tmp.trim();
                     let filename = Path::new(&tmp);
-                    let mut f = File::open(Path::new(&filename)).expect("File not found");
+                    let mut f;
+                    match File::open(Path::new(&filename)){
+                        Ok(file) => f = file,
+                        Err(_e) => {println!("This is not a path to a .iasm file"); continue;}
+                    }
                     let mut contents = String::new();
-                    f.read_to_string(&mut contents)
-                        .expect("Error while reading the file");
+                    match f.read_to_string(&mut contents){
+                        Err(_) => println!("Error while reading the file"),
+                        Ok(b) => println!("{} byte was appended",b)
+                    }
                     let program = match program(CompleteStr(&contents)) {
                         Ok((_, program)) => program,
                         Err(e) => {
