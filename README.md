@@ -5,3 +5,5 @@ This is a passion project of mine trying to create a Programming language, I hav
 ## Future updates
 - A language using the Assembly language i have made.
 - Concurrency
+- Http connections
+
